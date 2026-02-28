@@ -1,4 +1,4 @@
-Provide as an overview for those who are interested.
+Provide as an overview for those who are interested and have a Docker environment to follow/test.
 ```
 1. Project Structure
    Project has the following layout (relative to the Dockerfile):
@@ -83,4 +83,62 @@ CMD []
 - Base image: python:3.11-slim is lightweight and Debian-based, suitable for all platforms.
 - Non‑root user: Improves security.
 - Entrypoint: Allows overriding the command (e.g., --once).
+---
+4. Create docker-compose.yml
+
+```yaml
+services:
+  sonarr-calendar:
+    build: .
+    container_name: sonarr_calendar
+    restart: unless-stopped
+    environment:
+      # Required
+      - SONARR_URL=http://192.168.0.226:30023                  # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
+      - SONARR_API_KEY=f9868e5f81644246988ffc6d3ba47aa8           # API key from Sonarr (Settings > General > Security)
+      - DAYS_PAST=7
+      - DAYS_FUTURE=30
+      - OUTPUT_HTML_FILE=/output/TV.html                   # output HTML file path (must be in a mounted volume)
+      # Optional (with defaults shown)
+      # - OUTPUT_JSON_FILE=/output/sonarr_data.json       # optional – remove if not wanted
+      - IMAGE_CACHE_DIR=/cache                            # default: sonarr_images
+      - REFRESH_INTERVAL_HOURS=6                          # default: 6
+      - HTML_THEME=dark                                   # default: dark
+      - GRID_COLUMNS=4                                     # default: 4
+      - IMAGE_QUALITY=fanart                               # default: fanart
+      - ENABLE_IMAGE_CACHE=true                            # default: true
+      - HTML_TITLE="My Sonarr Dashboard"                   # default: Sonarr Calendar Pro
+      - TZ=Europe/London                                   # for correct log timestamps
+    volumes:
+      - ./output:/output
+      - ./cache:/cache
+    networks:
+      - sonarr-network
+ 
+
+networks:
+  sonarr-network:
+
+    driver: bridge
+```
+---
+5. Building and Running the Container
+
+Build the image
+```
+docker-compose build
+```
+Run in auto‑refresh mode (default)
+```
+docker-compose up -d
+```
+Run once (to generate HTML and exit)
+```
+docker-compose run --rm sonarr-calendar --once
+```
+View logs
+```
+docker-compose logs -f
+```
+
 
