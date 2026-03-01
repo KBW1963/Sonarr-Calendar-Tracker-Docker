@@ -1,9 +1,13 @@
-# Sonarr Calendar Tracker - Docker version
-
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Sonarr](https://img.shields.io/badge/Sonarr-v3%2Fv4-orange)
 
+# Sonarr Calendar Tracker – Docker Deployment Guide
+This guide hopes to provide a step‑by‑step of instructions for installing the Sonarr Calendar Tracker using Docker. It is written for users of TrueNAS SCALE, Portainer, Dockge, or any Docker‑compatible system. I 
+assume you have basic familiarity with your container management tool.
 
+I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML.
+
+---
 A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
 Track upcoming episodes over a specified date range, monitor overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
 
@@ -88,4 +92,5 @@ docker run -e SONARR_URL="http://192.168.1.100:8989" \
 The volumes mount host directories to these container paths.
 - Output directory – must be writable by the container user. The HTML file (and optionally JSON) will be written here.
 - Cache directory – must be writable by the container user. Images will be stored here in subdirectories named after series IDs (e.g., 123_fanart.jpg). If you set IMAGE_CACHE_DIR to a path inside the output directory (e.g., /output/sonarr_images), then the images will appear alongside the HTML file, making them accessible via the same web server.
+
 
