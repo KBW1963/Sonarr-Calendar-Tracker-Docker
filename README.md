@@ -1,15 +1,9 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Sonarr](https://img.shields.io/badge/Sonarr-v3%2Fv4-orange)
 
-# Sonarr Calendar Tracker – Docker Deployment Guide
-This guide hopes to provide a step‑by‑step of instructions for installing the Sonarr Calendar Tracker using Docker. It is written for users of TrueNAS SCALE, Portainer, Dockge, or any Docker‑compatible system. I 
-assume you have basic familiarity with your container management tool.
-
-I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML with the HTML saved to a webdav location, this in turn is referenced by my homelab dashboard, currently [homepage](https://gethomepage.dev).
-
----
+# Sonarr Calendar Tracker 
 A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
-Track upcoming episodes over a specified date range, monitor overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
+Monitor upcoming episodes over a specified date range, track overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
 
 ### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
 
@@ -27,6 +21,11 @@ I am happy with it for my needs and will NOT be constantly developing it, sorry 
 
 So, please be understanding! ☺️.
 ---
+### Docker Deployment Guide
+This guide hopes to provide a step‑by‑step of instructions for installing the Sonarr Calendar Tracker using Docker. It is written for users of TrueNAS SCALE, Portainer, Dockge, or any Docker‑compatible system. I 
+assume you have basic familiarity with your container management tool.
+
+I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML with the HTML saved to a webdav location, this in turn is referenced by my homelab dashboard, currently [homepage](https://gethomepage.dev).
 
 ## ✨ Features
 
@@ -38,9 +37,39 @@ So, please be understanding! ☺️.
 - 🔄 **Auto‑refresh mode** – Keep the dashboard running and update periodically (configurable).
 - 🌍 **OS‑aware date formatting** – Dates automatically adapt to your system’s locale (e.g. `DD/MM/YYYY` or `MM/DD/YYYY`).
 - 🔗 **Direct links to Sonarr** – Click any show card to open its page in Sonarr.
+  
 ---
-## Environment Variables Reference
 
+## 🗃️ Prerequisites
+- A working Docker environment – either TrueNAS SCALE Apps, Portainer, Dockge, or a machine with Docker and docker‑compose installed.
+- Sonarr instance – you need its URL and API key (Settings → General in Sonarr).
+- Basic knowledge of your container platform’s web UI (for TrueNAS users) or the command line (for docker‑compose users).
+- A place to store persistent data – directories on your host where the container will write the HTML file and cache images. These should be on a dataset (TrueNAS) or any folder with appropriate permissions.
+
+---
+
+## 🔏 Understanding User IDs (UID) and Permissions
+The container runs as a non‑root user for security. The Dockerfile creates a user named app with a specific UID (User ID). In the official image, the UID is 1000, but we will show you how to verify and adjust it.
+
+Why this matters: When you mount a host directory into the container, that directory must be writable by the container’s user. If the UID inside the container (e.g., 1000) does not match the owner of the host 
+directory, you will see permission errors and files will not be saved.
+
+---
+
+## ⛃ Volume Mounts and Storage
+The volumes mount host directories to these container paths.
+- Output directory – must be writable by the container user. The HTML file (and optionally JSON) will be written here.
+- Cache directory – must be writable by the container user. Images will be stored here in subdirectories named after series IDs (e.g., `123_fanart.jpg`). If you set `IMAGE_CACHE_DIR` to a path inside the output directory (e.g., `/output/sonarr_images`), then the images will appear alongside the HTML file, making them accessible via the same web server.
+
+### ℹ️ Permission Tips
+- Always check the container’s UID with docker run --rm <image> id.
+- Set host directory ownership to that UID: chown UID:UID /path/to/dir
+- Set directory permissions to at least 755 (owner can write, others can read).
+- If you use a NAS with NFS, ensure the NFS export allows the UID to write.
+
+---
+
+## 🔡 Environment Variables Reference
 The python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker) referenced a config file, this is now handled exclusively via environment variables in the `docker-compose.yml`. 
 
 Below is a complete list of supported variables, their requirements, descriptions, default values (if any), and examples.
@@ -62,8 +91,6 @@ Below is a complete list of supported variables, their requirements, description
 | `HTML_TITLE` | No | Browser tab title for the generated HTML page. | `Sonarr Calendar Pro` | `My Sonarr Dashboard` |
 | `TZ` | No | Container timezone (used for log timestamps and date calculations). | `UTC` | `America/New_York` |
 
----
-
 ### ⚠️ Important Notes
 
 - **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
@@ -73,7 +100,7 @@ Below is a complete list of supported variables, their requirements, description
 
 ---
 
-### 🐳 Setting Environment Variables in Docker
+## 🐳 Setting Environment Variables in Docker
 
 #### With `docker run`:
 ```bash
@@ -88,10 +115,8 @@ docker run -e SONARR_URL="http://192.168.1.100:8989" \
            your-image:latest
 ```
 ---
-### ⛃ Volume Mounts and Storage
-The volumes mount host directories to these container paths.
-- Output directory – must be writable by the container user. The HTML file (and optionally JSON) will be written here.
-- Cache directory – must be writable by the container user. Images will be stored here in subdirectories named after series IDs (e.g., 123_fanart.jpg). If you set IMAGE_CACHE_DIR to a path inside the output directory (e.g., /output/sonarr_images), then the images will appear alongside the HTML file, making them accessible via the same web server.
+
+
 
 
 
