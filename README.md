@@ -1,5 +1,7 @@
-![License](https://img.shields.io/badge/license-MIT-green)
 ![Sonarr](https://img.shields.io/badge/Sonarr-v3%2Fv4-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+---
 
 # Sonarr Calendar Tracker 
 A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
@@ -135,6 +137,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
