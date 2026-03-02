@@ -4,7 +4,7 @@
 ---
 
 # Sonarr Calendar Tracker - Docker version
-A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
+A beautiful, feature‑rich HTML dashboard for your [Sonarr](http://sonarr.tv) shows.  
 Monitor upcoming episodes over a specified date range, track overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
 
 ### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
@@ -181,6 +181,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
