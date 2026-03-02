@@ -3,7 +3,7 @@
 
 ---
 
-# Sonarr Calendar Tracker 
+# Sonarr Calendar Tracker - Docker version
 A beautiful, feature‑rich HTML dashboard for your Sonarr shows.  
 Monitor upcoming episodes over a specified date range, track overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
 
@@ -23,7 +23,7 @@ I am happy with it for my needs and will NOT be constantly developing it, sorry 
 
 So, please be understanding! ☺️.
 ---
-### Docker Deployment Guide
+# Docker Deployment Guide
 This guide hopes to provide a step‑by‑step of instructions for installing the Sonarr Calendar Tracker using Docker. It is written for users of TrueNAS SCALE, Portainer, Dockge, or any Docker‑compatible system. I 
 assume you have basic familiarity with your container management tool.
 
@@ -45,6 +45,7 @@ I have tested the deployment via my own TrueNAS env which already has my ARR sta
 ## 🗃️ Prerequisites
 - A working Docker environment – either TrueNAS SCALE Apps, Portainer, Dockge, or a machine with Docker and docker‑compose installed.
 - Sonarr instance – you need its URL and API key (Settings → General in Sonarr).
+- Since the dashboard defaults to fanart, it would be useful to have fanart for your shows (see image caching above).
 - Basic knowledge of your container platform’s web UI (for TrueNAS users) or the command line (for docker‑compose users).
 - A place to store persistent data – directories on your host where the container will write the HTML file and cache images. These should be on a dataset (TrueNAS) or any folder with appropriate permissions.
 
@@ -180,6 +181,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
