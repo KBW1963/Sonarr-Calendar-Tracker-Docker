@@ -27,7 +27,7 @@ So, please be understanding! ☺️.
 This guide hopes to provide a step‑by‑step of instructions for installing the Sonarr Calendar Tracker using Docker. It is written for users of TrueNAS SCALE, Portainer, Dockge, or any Docker‑compatible system. I 
 assume you have basic familiarity with your container management tool.
 
-I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML with the HTML saved to a webdav location, this in turn is referenced by my homelab dashboard, currently [homepage](https://gethomepage.dev).
+I have tested the deployment via my own TrueNAS env which already has my ARR stack up and running. I deployed the Sonarr Calendar Tracker as a custom app via YAML with the HTML saved to a WebDAV location, this in turn is referenced by my homelab dashboard, currently [homepage](https://gethomepage.dev).
 
 ## ✨ Dashboard Features
 
@@ -181,6 +181,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
