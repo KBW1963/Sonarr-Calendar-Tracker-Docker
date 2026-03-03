@@ -8,7 +8,6 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from sonarr_calendar import __display_version__ as VERSION
 from sonarr_calendar.config import load_config, Config
 from sonarr_calendar.api_client import SonarrClient
 from sonarr_calendar.image_cache import ImageCache
@@ -48,7 +47,7 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
         processed_shows = process_calendar_data(episodes, all_series, date_range, sonarr, config)
         logger.info("ℹ️  Generating HTML calendar...")
         html_gen = HTMLGenerator(config)
-        html_content = html_gen.generate(processed_shows, episodes, date_range)
+        html_content = html_gen.generate(processed_shows, episodes, date_range, sonarr)  # pass sonarr client
         output_path = Path(config.output_html_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(html_content, encoding='utf-8')
@@ -65,7 +64,7 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
                     'total_days': date_range.total_days,
                 },
                 'total_shows': len(processed_shows),
-                'version': VERSION,
+                'version': "2.6.0"
             }
             json_path.write_text(json.dumps(json_data, indent=2), encoding='utf-8')
             logger.info("✅ JSON data saved to %s", json_path)
@@ -101,7 +100,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Sonarr Calendar Tracker")
     parser.add_argument('--once', action='store_true', help='Run once and exit')
     parser.add_argument('--config', type=Path, default=None,
-                        help='Path to config file (default: searched in current dir, script dir, project root, and ~/.sonarr_calendar_config/)')
+                        help='Path to config file (default: .sonarr_calendar_config.json in current dir)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose logging')
     args = parser.parse_args()
 
