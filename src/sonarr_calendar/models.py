@@ -115,6 +115,7 @@ class Episode:
 
 @dataclass
 class ProcessedShow:
+    # Non‑default fields first (in the order they appear in the __init__)
     series_id: int
     title: str
     year: Optional[int]
@@ -122,7 +123,7 @@ class ProcessedShow:
     runtime: Optional[int]
     genres: List[str]
     rating: float
-    poster_url: Optional[str]
+    poster_url: Optional[str]                # primary image (fanart, based on config)
     progress_percentage: float
     progress_color: str
     total_episodes: int
@@ -136,6 +137,9 @@ class ProcessedShow:
     current_season_episodes: int
     current_season_downloaded: int
     season_episode_counts: Dict[int, int]
+
+    # Fields with default values (must come after all non‑default fields)
+    poster_url_poster: Optional[str] = None  # poster image for completed seasons section
     episodes_in_range: List[Episode] = field(default_factory=list)
     date_range_episodes: int = 0
     date_range_downloaded: int = 0
@@ -240,7 +244,10 @@ def process_calendar_data(
             logger.warning(f"Series {series_id} not found, skipping")
             continue
 
-        poster = get_poster_url(series, config.image_quality, config.sonarr_url)
+        # Primary image (fanart) – will be cached
+        poster_url = get_poster_url(series, preferred_type=config.image_quality, base_url=config.sonarr_url)
+        # Poster image (for completed seasons) – not cached, used directly from Sonarr
+        poster_url_poster = get_poster_url(series, preferred_type='poster', base_url=config.sonarr_url)
 
         (overall, color,
          monitored, unmonitored, tot_seasons,
@@ -261,7 +268,7 @@ def process_calendar_data(
             runtime=series.runtime,
             genres=series.genres,
             rating=series.rating,
-            poster_url=poster,
+            poster_url=poster_url,
             progress_percentage=overall,
             progress_color=color,
             total_episodes=series.episode_count,
@@ -275,6 +282,7 @@ def process_calendar_data(
             current_season_episodes=cur_eps,
             current_season_downloaded=cur_down,
             season_episode_counts=series.season_episode_counts,
+            poster_url_poster=poster_url_poster,
             episodes_in_range=in_range,
             date_range_episodes=len(in_range),
             date_range_downloaded=range_downloaded,
@@ -368,7 +376,8 @@ def calculate_completed_seasons_in_range(
                     'season': show.current_season,
                     'completion_date': latest.air_date,
                     'total_episodes': show.current_season_episodes,
-                    'poster_url': show.poster_url
+                    # Use poster image for this section (fallback to fanart if poster missing)
+                    'poster_url': show.poster_url_poster or show.poster_url
                 })
             # else:
             #     logger.info(f"  --> Not within range (air date {latest.air_date})")
@@ -391,7 +400,8 @@ def calculate_completed_seasons_in_range(
                     'season': show.current_season,
                     'completion_date': last_air_date,
                     'total_episodes': show.current_season_episodes,
-                    'poster_url': show.poster_url
+                    # Use poster image for this section (fallback to fanart if poster missing)
+                    'poster_url': show.poster_url_poster or show.poster_url
                 })
             # else:
             #     logger.info(f"  --> Not within range (air date {last_air_date})")
