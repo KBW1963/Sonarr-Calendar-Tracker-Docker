@@ -1,4 +1,4 @@
-# src/sonarr_calendar/models.py
+# src/sonarr_calendar/models.py (DEBUG VERSION)
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import date, datetime, timezone
@@ -32,7 +32,6 @@ class SeriesInfo:
 
     @classmethod
     def from_api(cls, data: Dict[str, Any]) -> 'SeriesInfo':
-        # First try top‑level fields, then fall back to statistics
         episode_count = data.get('episodeCount')
         if episode_count is None:
             episode_count = data.get('statistics', {}).get('episodeCount', 0)
@@ -41,7 +40,6 @@ class SeriesInfo:
         if episode_file_count is None:
             episode_file_count = data.get('statistics', {}).get('episodeFileCount', 0)
 
-        # Season episode counts for finale detection (from seasons list)
         season_ep_counts = {}
         for season in data.get('seasons', []):
             sn = season.get('seasonNumber')
@@ -78,7 +76,6 @@ class Episode:
     monitored: bool
     overview: Optional[str]
     episode_type: Optional[str] = None
-    # Additional computed fields for template
     days_until: int = 0
     formatted_season_episode: str = ""
     single_episode: bool = True
@@ -96,6 +93,7 @@ class Episode:
         episode = data.get('episodeNumber', 0)
         formatted = f"S{season:02d}E{episode:02d}" if season and episode else ""
         title_str = data.get('title', 'TBA')
+        ep_type = data.get('episodeType')
         return cls(
             series_id=data['seriesId'],
             season_number=season,
@@ -105,7 +103,7 @@ class Episode:
             has_file=data.get('hasFile', False),
             monitored=data.get('monitored', False),
             overview=data.get('overview', ''),
-            episode_type=data.get('episodeType'),
+            episode_type=ep_type,
             days_until=days,
             formatted_season_episode=formatted,
             full_title=title_str,
@@ -115,7 +113,6 @@ class Episode:
 
 @dataclass
 class ProcessedShow:
-    # Non‑default fields first (in the order they appear in the __init__)
     series_id: int
     title: str
     year: Optional[int]
@@ -123,7 +120,7 @@ class ProcessedShow:
     runtime: Optional[int]
     genres: List[str]
     rating: float
-    poster_url: Optional[str]                # primary image (fanart, based on config)
+    poster_url: Optional[str]
     progress_percentage: float
     progress_color: str
     total_episodes: int
@@ -138,8 +135,7 @@ class ProcessedShow:
     current_season_downloaded: int
     season_episode_counts: Dict[int, int]
 
-    # Fields with default values (must come after all non‑default fields)
-    poster_url_poster: Optional[str] = None  # poster image for completed seasons section
+    poster_url_poster: Optional[str] = None
     episodes_in_range: List[Episode] = field(default_factory=list)
     date_range_episodes: int = 0
     date_range_downloaded: int = 0
@@ -153,21 +149,6 @@ class ProcessedShow:
 def calculate_progress(series: SeriesInfo) -> Tuple[
     float, str, int, int, int, float, bool, int, int, int
 ]:
-    """
-    Calculate overall progress and related stats.
-
-    Returns:
-        overall_percentage (float)
-        color (str)
-        monitored_seasons (int)
-        unmonitored_seasons (int)
-        total_seasons (int)
-        current_season_progress (float)
-        current_season_complete (bool)
-        current_season_episodes (int)
-        current_season_downloaded (int)
-        current_season_number (int)
-    """
     total_ep = series.episode_count
     downloaded = series.episode_file_count
 
@@ -182,14 +163,12 @@ def calculate_progress(series: SeriesInfo) -> Tuple[
         else:
             unmonitored += 1
 
-    # Find current season (largest monitored season with episodes)
     current_season = 0
     for s in series.seasons:
         sn = s.get('seasonNumber', 0)
         if sn > current_season and s.get('monitored') and s.get('statistics', {}).get('totalEpisodeCount', 0) > 0:
             current_season = sn
 
-    # Progress for current season
     current_season_total = 0
     current_season_downloaded = 0
     for s in series.seasons:
@@ -231,11 +210,17 @@ def process_calendar_data(
     sonarr_client,
     config
 ) -> List[ProcessedShow]:
-    """Group episodes by series, compute stats, and return list of ProcessedShow."""
     series_map = {s['id']: SeriesInfo.from_api(s) for s in all_series}
     ep_by_series = defaultdict(list)
+
+    # DEBUG: log every episode as it is created
     for ep in episodes:
-        ep_by_series[ep['seriesId']].append(Episode.from_api(ep))
+        episode_obj = Episode.from_api(ep)
+        logger.info(f"EPISODE: series={episode_obj.series_id} "
+                    f"S{episode_obj.season_number:02d}E{episode_obj.episode_number:02d} "
+                    f"air={episode_obj.air_date} type={episode_obj.episode_type} "
+                    f"title={episode_obj.title}")
+        ep_by_series[ep['seriesId']].append(episode_obj)
 
     processed = []
     for series_id, eps in ep_by_series.items():
@@ -244,10 +229,8 @@ def process_calendar_data(
             logger.warning(f"Series {series_id} not found, skipping")
             continue
 
-        # Primary image (fanart) – will be cached
-        poster_url = get_poster_url(series, preferred_type=config.image_quality, base_url=config.sonarr_url)
-        # Poster image (for completed seasons) – not cached, used directly from Sonarr
-        poster_url_poster = get_poster_url(series, preferred_type='poster', base_url=config.sonarr_url)
+        poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
+        poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
 
         (overall, color,
          monitored, unmonitored, tot_seasons,
@@ -294,7 +277,6 @@ def process_calendar_data(
     return processed
 
 def calculate_overall_statistics(shows: List[ProcessedShow], date_range) -> Dict[str, Any]:
-    """Calculate overall statistics across all series."""
     total_series = len(shows)
 
     total_episodes_all = sum(s.total_episodes for s in shows)
@@ -344,67 +326,40 @@ def calculate_completed_seasons_in_range(
     end_date: date,
     sonarr_client
 ) -> List[Dict]:
-    """Find shows that completed their current season within the date range."""
     completed = []
-    # DEBUG: The following lines are commented out for normal operation.
-    # Uncomment them to see detailed information about why each show is (or isn't) added.
-    # logger.info("=== DEBUG: calculate_completed_seasons_in_range ===")
-    # logger.info(f"Date range: {start_date} to {end_date}")
+    # Debug lines commented out
     for show in shows:
-        # logger.info(f"\nChecking show: {show.title} (ID: {show.series_id})")
-        # logger.info(f"  current_season: {show.current_season}")
-        # logger.info(f"  current_season_complete: {show.current_season_complete}")
-        # logger.info(f"  current_season_episodes: {show.current_season_episodes}")
-        # logger.info(f"  episodes_in_range count: {len(show.episodes_in_range)}")
-        # for idx, ep in enumerate(show.episodes_in_range):
-        #     logger.info(f"    Ep {idx+1}: S{ep.season_number:02d}E{ep.episode_number:02d} - {ep.air_date} - {ep.title}")
-
         if not show.current_season_complete:
-            # logger.info("  --> Skipping because season not complete")
             continue
 
         season_eps = [e for e in show.episodes_in_range if e.season_number == show.current_season]
-        # logger.info(f"  Season episodes in range: {len(season_eps)}")
         if season_eps:
             latest = max(season_eps, key=lambda e: e.air_date or date.min)
-            # logger.info(f"  Latest episode air date: {latest.air_date}")
             if latest.air_date and start_date <= latest.air_date <= end_date:
-                # logger.info(f"  --> Within range! Adding to completed seasons.")
                 completed.append({
                     'title': show.title,
                     'series_id': show.series_id,
                     'season': show.current_season,
                     'completion_date': latest.air_date,
                     'total_episodes': show.current_season_episodes,
-                    # Use poster image for this section (fallback to fanart if poster missing)
                     'poster_url': show.poster_url_poster or show.poster_url
                 })
-            # else:
-            #     logger.info(f"  --> Not within range (air date {latest.air_date})")
         else:
-            # logger.info("  --> No season episodes in range. Attempting fallback: fetching all episodes.")
             all_episodes = sonarr_client.get_series_episodes(show.series_id)
             season_eps_all = [e for e in all_episodes if e.get('seasonNumber') == show.current_season and e.get('airDate')]
             if not season_eps_all:
-                # logger.info("  --> No episodes found for this season at all.")
                 continue
             season_eps_all.sort(key=lambda e: e.get('episodeNumber', 0))
             last_ep = season_eps_all[-1]
             last_air_date = datetime.strptime(last_ep['airDate'], "%Y-%m-%d").date()
-            # logger.info(f"  Last episode from series API: S{show.current_season}E{last_ep['episodeNumber']} - air date {last_air_date}")
             if start_date <= last_air_date <= end_date:
-                # logger.info(f"  --> Within range! Adding to completed seasons (fallback).")
                 completed.append({
                     'title': show.title,
                     'series_id': show.series_id,
                     'season': show.current_season,
                     'completion_date': last_air_date,
                     'total_episodes': show.current_season_episodes,
-                    # Use poster image for this section (fallback to fanart if poster missing)
                     'poster_url': show.poster_url_poster or show.poster_url
                 })
-            # else:
-            #     logger.info(f"  --> Not within range (air date {last_air_date})")
 
-    # logger.info(f"\nTotal completed seasons found: {len(completed)}")
     return completed

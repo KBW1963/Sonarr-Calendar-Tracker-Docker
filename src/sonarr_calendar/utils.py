@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, date, timezone
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
+logger = logging.getLogger(__name__)
+
 # ----------------------------------------------------------------------------
 # Graceful Interrupt Handler
 # ----------------------------------------------------------------------------
@@ -21,7 +23,7 @@ class GracefulInterruptHandler:
         if not self.interrupt_received:
             self.interrupt_received = True
             print("\n\n⚠️  Interrupt received - Cleaning up...")
-            raise KeyboardInterrupt   # immediate interrupt
+            raise KeyboardInterrupt
         else:
             print("\n❌ Force exit")
             sys.exit(1)
@@ -106,13 +108,7 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
     Determine if episode is a premiere or finale and return badge info.
     First uses Sonarr's episodeType if available (from the episode object or dict),
     otherwise falls back to heuristics (episode 1 = premiere, last episode = finale).
-
-    Args:
-        episode: Episode dataclass instance or raw dict from API.
-        season_episode_counts: Dict mapping season numbers to total episodes (used for finale detection).
-
-    Returns:
-        Dict with 'type', 'text', 'color', 'icon' keys, or None.
+    As a fallback, any episode with season_number == 0 is considered a Special.
     """
     # Get episode type if present (from Episode object or dict)
     if hasattr(episode, 'episode_type'):
@@ -127,7 +123,6 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
     # If Sonarr provided an episode type, use it directly
     if ep_type:
         # Mapping from Sonarr episode types to badge info
-        # See: https://github.com/Sonarr/Sonarr/wiki/Episode
         type_map = {
             'seasonPremiere': {
                 'type': 'premiere',
@@ -138,50 +133,57 @@ def get_episode_badge(episode, season_episode_counts: Dict[int, int] = None) -> 
             'seriesPremiere': {
                 'type': 'series-premiere',
                 'text': 'Series Premiere',
-                'color': '#FFD700',  # gold
+                'color': '#FFD700',
                 'icon': 'fa-star'
             },
             'midSeasonPremiere': {
                 'type': 'midseason-premiere',
                 'text': 'Mid‑Season Premiere',
-                'color': '#00CED1',  # turquoise
+                'color': '#00CED1',
                 'icon': 'fa-star-half-alt'
             },
             'seasonFinale': {
                 'type': 'season-finale',
                 'text': 'Season Finale',
-                'color': '#FFA500',  # orange
+                'color': '#FFA500',
                 'icon': 'fa-flag'
             },
             'midSeasonFinale': {
                 'type': 'midseason-finale',
                 'text': 'Mid‑Season Finale',
-                'color': '#FF8C00',  # dark orange
+                'color': '#FF8C00',
                 'icon': 'fa-flag-checkered'
             },
             'seriesFinale': {
                 'type': 'series-finale',
                 'text': 'Series Finale',
-                'color': '#FF0000',  # red
+                'color': '#FF0000',
                 'icon': 'fa-flag-checkered'
             },
             'special': {
                 'type': 'special',
                 'text': 'Special',
-                'color': '#9C27B0',  # purple
+                'color': '#9C27B0',
                 'icon': 'fa-gem'
             },
-            # 'standard' episodes intentionally omitted – no badge
         }
         if ep_type in type_map:
             return type_map[ep_type]
-        # If unknown type, fall through to heuristics
+
+    # Fallback for specials (season 0) even if episodeType is missing
+    if season_number == 0:
+        return {
+            'type': 'special',
+            'text': 'Special',
+            'color': '#9C27B0',
+            'icon': 'fa-gem'
+        }
 
     # Fallback heuristics (for older Sonarr versions or missing episodeType)
     if not season_number or not episode_number:
         return None
 
-    # Premiere
+    # Premiere (episode 1)
     if episode_number == 1:
         return {
             'type': 'premiere',
