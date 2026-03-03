@@ -77,6 +77,8 @@ class Episode:
     has_file: bool
     monitored: bool
     overview: Optional[str]
+    # NEW: store the episodeType from Sonarr (e.g., 'seasonPremiere', 'midSeasonFinale', etc.)
+    episode_type: Optional[str] = None
     # Additional computed fields for template
     days_until: int = 0
     formatted_season_episode: str = ""
@@ -104,6 +106,8 @@ class Episode:
             has_file=data.get('hasFile', False),
             monitored=data.get('monitored', False),
             overview=data.get('overview', ''),
+            # NEW: store episode type
+            episode_type=data.get('episodeType'),
             days_until=days,
             formatted_season_episode=formatted,
             full_title=title_str,
