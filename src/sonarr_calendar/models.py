@@ -77,7 +77,6 @@ class Episode:
     has_file: bool
     monitored: bool
     overview: Optional[str]
-    # NEW: store the episodeType from Sonarr (e.g., 'seasonPremiere', 'midSeasonFinale', etc.)
     episode_type: Optional[str] = None
     # Additional computed fields for template
     days_until: int = 0
@@ -106,7 +105,6 @@ class Episode:
             has_file=data.get('hasFile', False),
             monitored=data.get('monitored', False),
             overview=data.get('overview', ''),
-            # NEW: store episode type
             episode_type=data.get('episodeType'),
             days_until=days,
             formatted_season_episode=formatted,
@@ -336,35 +334,34 @@ def calculate_completed_seasons_in_range(
     episodes: List[Dict],
     start_date: date,
     end_date: date,
-    sonarr_client  # now required for fallback
+    sonarr_client
 ) -> List[Dict]:
     """Find shows that completed their current season within the date range."""
     completed = []
-    logger.info("=== DEBUG: calculate_completed_seasons_in_range ===")
-    logger.info(f"Date range: {start_date} to {end_date}")
+    # DEBUG: The following lines are commented out for normal operation.
+    # Uncomment them to see detailed information about why each show is (or isn't) added.
+    # logger.info("=== DEBUG: calculate_completed_seasons_in_range ===")
+    # logger.info(f"Date range: {start_date} to {end_date}")
     for show in shows:
-        logger.info(f"\nChecking show: {show.title} (ID: {show.series_id})")
-        logger.info(f"  current_season: {show.current_season}")
-        logger.info(f"  current_season_complete: {show.current_season_complete}")
-        logger.info(f"  current_season_episodes: {show.current_season_episodes}")
-        logger.info(f"  episodes_in_range count: {len(show.episodes_in_range)}")
-
-        # List all episodes in range for this show (debug)
-        for idx, ep in enumerate(show.episodes_in_range):
-            logger.info(f"    Ep {idx+1}: S{ep.season_number:02d}E{ep.episode_number:02d} - {ep.air_date} - {ep.title}")
+        # logger.info(f"\nChecking show: {show.title} (ID: {show.series_id})")
+        # logger.info(f"  current_season: {show.current_season}")
+        # logger.info(f"  current_season_complete: {show.current_season_complete}")
+        # logger.info(f"  current_season_episodes: {show.current_season_episodes}")
+        # logger.info(f"  episodes_in_range count: {len(show.episodes_in_range)}")
+        # for idx, ep in enumerate(show.episodes_in_range):
+        #     logger.info(f"    Ep {idx+1}: S{ep.season_number:02d}E{ep.episode_number:02d} - {ep.air_date} - {ep.title}")
 
         if not show.current_season_complete:
-            logger.info("  --> Skipping because season not complete")
+            # logger.info("  --> Skipping because season not complete")
             continue
 
-        # First, check episodes in range for this season
         season_eps = [e for e in show.episodes_in_range if e.season_number == show.current_season]
-        logger.info(f"  Season episodes in range: {len(season_eps)}")
+        # logger.info(f"  Season episodes in range: {len(season_eps)}")
         if season_eps:
             latest = max(season_eps, key=lambda e: e.air_date or date.min)
-            logger.info(f"  Latest episode air date: {latest.air_date}")
+            # logger.info(f"  Latest episode air date: {latest.air_date}")
             if latest.air_date and start_date <= latest.air_date <= end_date:
-                logger.info(f"  --> Within range! Adding to completed seasons.")
+                # logger.info(f"  --> Within range! Adding to completed seasons.")
                 completed.append({
                     'title': show.title,
                     'series_id': show.series_id,
@@ -373,24 +370,21 @@ def calculate_completed_seasons_in_range(
                     'total_episodes': show.current_season_episodes,
                     'poster_url': show.poster_url
                 })
-            else:
-                logger.info(f"  --> Not within range (air date {latest.air_date})")
+            # else:
+            #     logger.info(f"  --> Not within range (air date {latest.air_date})")
         else:
-            # No episodes for this season in range. Use fallback: fetch all episodes for the series
-            logger.info("  --> No season episodes in range. Attempting fallback: fetching all episodes.")
+            # logger.info("  --> No season episodes in range. Attempting fallback: fetching all episodes.")
             all_episodes = sonarr_client.get_series_episodes(show.series_id)
-            # Find the last episode of the current season
             season_eps_all = [e for e in all_episodes if e.get('seasonNumber') == show.current_season and e.get('airDate')]
             if not season_eps_all:
-                logger.info("  --> No episodes found for this season at all.")
+                # logger.info("  --> No episodes found for this season at all.")
                 continue
-            # Sort by episode number to find the last
             season_eps_all.sort(key=lambda e: e.get('episodeNumber', 0))
             last_ep = season_eps_all[-1]
             last_air_date = datetime.strptime(last_ep['airDate'], "%Y-%m-%d").date()
-            logger.info(f"  Last episode from series API: S{show.current_season}E{last_ep['episodeNumber']} - air date {last_air_date}")
+            # logger.info(f"  Last episode from series API: S{show.current_season}E{last_ep['episodeNumber']} - air date {last_air_date}")
             if start_date <= last_air_date <= end_date:
-                logger.info(f"  --> Within range! Adding to completed seasons (fallback).")
+                # logger.info(f"  --> Within range! Adding to completed seasons (fallback).")
                 completed.append({
                     'title': show.title,
                     'series_id': show.series_id,
@@ -399,8 +393,8 @@ def calculate_completed_seasons_in_range(
                     'total_episodes': show.current_season_episodes,
                     'poster_url': show.poster_url
                 })
-            else:
-                logger.info(f"  --> Not within range (air date {last_air_date})")
+            # else:
+            #     logger.info(f"  --> Not within range (air date {last_air_date})")
 
-    logger.info(f"\nTotal completed seasons found: {len(completed)}")
+    # logger.info(f"\nTotal completed seasons found: {len(completed)}")
     return completed

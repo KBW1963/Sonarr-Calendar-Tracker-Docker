@@ -57,23 +57,24 @@ class HTMLGenerator:
         self.env.globals['now'] = lambda: datetime.now(timezone.utc)
 
     def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange, sonarr_client) -> str:
-        # DEBUG: Check shows list
-        logger.info("\n=== DEBUG in html_generator.generate ===")
-        logger.info(f"shows list has {len(shows)} items")
-        if shows:
-            logger.info(f"First show: {shows[0].title} (ID: {shows[0].series_id})")
-        else:
-            logger.info("shows list is EMPTY!")
+        # DEBUG: The following lines are commented out for normal operation.
+        # Uncomment them to see detailed information about the shows list and completed seasons.
+        # logger.info("\n=== DEBUG in html_generator.generate ===")
+        # logger.info(f"shows list has {len(shows)} items")
+        # if shows:
+        #     logger.info(f"First show: {shows[0].title} (ID: {shows[0].series_id})")
+        # else:
+        #     logger.info("shows list is EMPTY!")
 
         from sonarr_calendar.models import calculate_overall_statistics, calculate_completed_seasons_in_range
 
         overall_stats = calculate_overall_statistics(shows, date_range)
-        logger.info(f"DEBUG: overall_stats calculated, shows_complete = {overall_stats['shows_complete']}")
+        # logger.info(f"DEBUG: overall_stats calculated, shows_complete = {overall_stats['shows_complete']}")
 
         completed_seasons = calculate_completed_seasons_in_range(
             shows, episodes, date_range.start, date_range.end, sonarr_client
         )
-        logger.info(f"DEBUG: completed_seasons returned {len(completed_seasons)} items")
+        # logger.info(f"DEBUG: completed_seasons returned {len(completed_seasons)} items")
 
         template = self.env.get_template('calendar.html.j2')
         return template.render(
