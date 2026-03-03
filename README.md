@@ -170,6 +170,7 @@ that the relative path `sonarr_images/...` resolves correctly. The easiest way i
 ### Of you could use nginx (Optional)
 To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
 
+**NOTE: I haven't actually tested this method.
 ```
 nginx:
   image: nginx:alpine
@@ -181,13 +182,6 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
-
-
-
-
-
-
-
 
 
 
