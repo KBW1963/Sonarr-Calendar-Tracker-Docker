@@ -7,6 +7,12 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.3.2] – 2026-03-04
+
+### Fixed
+
+- **Episode frame overflow** – Resolved an issue where badges (special, premiere, etc.) could cause episode details to overflow the fixed‑height container. The episode header now uses `flex-wrap: nowrap` and its children have `min-width: 0`, ensuring all elements shrink to fit within the available space without breaking the layout.
+
 ## [3.3.1] – 2026-03-04
 
 ### Added
