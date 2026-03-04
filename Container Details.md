@@ -40,7 +40,7 @@ sonarr_images
 sonarr_calendar.html
 sonarr_calendar_data.json
 *.md
-*.py
+
 ```
 ---
 3. Create the Dockerfile
@@ -141,6 +141,7 @@ View logs
 ```
 docker-compose logs -f
 ```
+
 
 
 
