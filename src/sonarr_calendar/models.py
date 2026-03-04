@@ -139,14 +139,13 @@ class Episode:
     monitored: bool
     overview: Optional[str]
     episode_type: Optional[str] = None
-    # Multi‑episode grouping fields
-    single_episode: bool = True
+    days_until: int = 0
     formatted_season_episode: str = ""
+    single_episode: bool = True
+    full_title: str = ""
+    individual_episode_count: int = 1
     titles_display: str = ""
     full_tooltip: str = ""
-    individual_episode_count: int = 1
-    days_until: int = 0
-    full_title: str = ""
 
     @classmethod
     def from_api(cls, data: Dict[str, Any]) -> 'Episode':
@@ -169,11 +168,11 @@ class Episode:
             overview=data.get('overview', ''),
             episode_type=ep_type,
             days_until=days,
-            full_title=title_str,
             formatted_season_episode=formatted,
-            single_episode=True,
+            full_title=title_str,
             titles_display=title_str,
             full_tooltip=title_str,
+            single_episode=True,
             individual_episode_count=1
         )
 
@@ -221,7 +220,7 @@ def calculate_progress(series: SeriesInfo) -> Tuple[
     unmonitored = 0
     for s in series.seasons:
         sn = s.get('seasonNumber', 0)
-        if sn < 0:
+        if sn <= 0:                     # skip season 0 (specials) and negative
             continue
         if s.get('monitored'):
             monitored += 1
@@ -297,11 +296,10 @@ def process_calendar_data(
         grouped_episodes = []
         total_individual_episodes = 0
 
-        # Sort dates to process in order (optional)
+        # Process dates in order (optional)
         for air_date, ep_list in sorted(date_dict.items()):
             ep_list.sort(key=lambda x: (x.season_number, x.episode_number))
             if len(ep_list) == 1:
-                # Single episode – use as is
                 grouped_episodes.append(ep_list[0])
                 total_individual_episodes += 1
             else:
@@ -324,16 +322,8 @@ def process_calendar_data(
                 # Determine combined status: has_file if all have file, monitored if any monitored
                 all_have_file = all(ep.has_file for ep in ep_list)
                 any_monitored = any(ep.monitored for ep in ep_list)
-                # Use the first episode's overview? We'll keep blank for grouped.
-                # For badge, we can use the first episode's type (if consistent) or None
-                # But badge will be determined by template using the grouped episode's fields.
-                # We'll store the type of the first episode; template can still call get_episode_badge.
-                # The grouped episode's episode_type will be passed to get_episode_badge.
-                # However, if multiple episodes have different types, we might need to decide.
-                # We'll use the type of the first episode, as it's the most common.
                 badge_type = ep_list[0].episode_type if ep_list else None
 
-                # Create a grouped episode
                 first_ep = ep_list[0]
                 grouped_ep = Episode(
                     series_id=first_ep.series_id,
@@ -368,7 +358,7 @@ def process_calendar_data(
         poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
 
         (overall, color,
-         monitored, unmonitored, tot_seasons,
+         monitored, unmonitored, _,
          cur_prog, cur_comp,
          cur_eps, cur_down,
          cur_cur) = calculate_progress(series)
@@ -381,6 +371,9 @@ def process_calendar_data(
 
         range_percent = (range_downloaded / total_individual_episodes * 100) if total_individual_episodes > 0 else 0
         range_color = get_progress_bar_color(range_percent)
+
+        # Count only regular seasons (season number > 0)
+        total_seasons = sum(1 for s in series.seasons if s.get('seasonNumber', 0) > 0)
 
         processed.append(ProcessedShow(
             series_id=series_id,
@@ -397,7 +390,7 @@ def process_calendar_data(
             downloaded_episodes=series.episode_file_count,
             monitored_seasons=monitored,
             unmonitored_seasons=unmonitored,
-            total_seasons=tot_seasons,
+            total_seasons=total_seasons,
             current_season=cur_cur,
             current_season_progress=cur_prog,
             current_season_complete=cur_comp,
