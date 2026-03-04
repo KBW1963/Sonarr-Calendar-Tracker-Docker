@@ -219,7 +219,8 @@
             margin: 0 auto 20px;
             backdrop-filter: blur(10px);
         }
-        <!-- ========== CHANGED: Summary grid now uses range_stats (previously overall_stats) ========== -->
+
+        /* ---------- Summary Grid ---------- */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -260,6 +261,7 @@
             opacity: 0.7;
             color: var(--text-secondary);
         }
+
         .completed-seasons-section {
             background: var(--completed-section-bg);
             padding: 25px;
@@ -367,6 +369,8 @@
             font-style: italic;
             grid-column: 1 / -1;
         }
+
+        /* ---------- Overall Progress Bars ---------- */
         .overall-progress-section {
             margin: 30px 0;
         }
@@ -400,6 +404,7 @@
             font-size: 0.9em;
             color: var(--text-secondary);
         }
+
         .filters {
             display: flex;
             justify-content: center;
@@ -1114,7 +1119,7 @@
                 ({{ date_range.total_days }} days total)
             </div>
 
-            <!-- ========== CHANGED: Summary grid now uses range_stats (previously overall_stats) ========== -->
+            <!-- ========== Summary grid – uses range_stats ========== -->
             <div class="summary-grid">
                 <div class="summary-card">
                     <div class="summary-number">{{ range_stats.total_series }}</div>
@@ -1194,7 +1199,7 @@
             </div>
         </div>
 
-        <!-- ========== CHANGED: Overall progress section now uses library_stats and range_stats ========== -->
+        <!-- ========== Overall progress bars ========== -->
         <div class="overall-progress-section">
             <div class="stat-progress">
                 <div class="stat-progress-header">
