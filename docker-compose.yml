@@ -1,6 +1,6 @@
 services:
   sonarr-calendar:
-    build: .
+    image: tomita2022/sonarr-calendar:latest
     container_name: sonarr_calendar
     restart: unless-stopped
     environment:
@@ -31,5 +31,6 @@ networks:
   sonarr-network:
 
     driver: bridge
+
 
 
