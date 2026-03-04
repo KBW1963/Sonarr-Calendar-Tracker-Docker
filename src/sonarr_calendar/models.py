@@ -409,6 +409,7 @@ def process_calendar_data(
     return processed
 
 def calculate_overall_statistics(shows: List[ProcessedShow], date_range) -> Dict[str, Any]:
+    """Calculate statistics for shows that have episodes in the date range."""
     total_series = len(shows)
 
     total_episodes_all = sum(s.total_episodes for s in shows)
@@ -449,6 +450,52 @@ def calculate_overall_statistics(shows: List[ProcessedShow], date_range) -> Dict
         'overall_progress': overall_progress,
         'overall_date_range_progress': overall_date_range_progress,
         'date_range': date_range
+    }
+
+def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
+    """
+    Calculate overall statistics across all series in the library.
+    Uses the raw API data, not just shows that have episodes in the date range.
+    """
+    total_series = len(all_series)
+
+    total_episodes_all = 0
+    total_downloaded_all = 0
+    total_seasons_all = 0
+    monitored_seasons = 0
+    unmonitored_seasons = 0
+
+    for series in all_series:
+        # Use the same logic as in SeriesInfo.from_api but inline for efficiency
+        stats = series.get('statistics', {})
+        episode_count = series.get('episodeCount') or stats.get('episodeCount', 0)
+        episode_file_count = series.get('episodeFileCount') or stats.get('episodeFileCount', 0)
+
+        total_episodes_all += episode_count
+        total_downloaded_all += episode_file_count
+
+        # Count seasons (excluding specials)
+        seasons = series.get('seasons', [])
+        for season in seasons:
+            sn = season.get('seasonNumber', 0)
+            if sn <= 0:
+                continue
+            total_seasons_all += 1
+            if season.get('monitored'):
+                monitored_seasons += 1
+            else:
+                unmonitored_seasons += 1
+
+    overall_progress = (total_downloaded_all / total_episodes_all * 100) if total_episodes_all else 0
+
+    return {
+        'total_series': total_series,
+        'total_episodes_all': total_episodes_all,
+        'total_downloaded_all': total_downloaded_all,
+        'total_seasons_all': total_seasons_all,
+        'monitored_seasons': monitored_seasons,
+        'unmonitored_seasons': unmonitored_seasons,
+        'overall_progress': overall_progress,
     }
 
 def calculate_completed_seasons_in_range(

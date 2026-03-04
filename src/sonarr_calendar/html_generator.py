@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 import base64
 import logging
 
-from sonarr_calendar import __display_version__  # <-- import display version
+from sonarr_calendar import __display_version__ as version
 from sonarr_calendar.models import ProcessedShow
 from sonarr_calendar.utils import (
     DateRange,
@@ -57,7 +57,8 @@ class HTMLGenerator:
         self.env.globals['timedelta'] = timedelta
         self.env.globals['now'] = lambda: datetime.now(timezone.utc)
 
-    def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange, sonarr_client) -> str:
+    def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange,
+                 sonarr_client, library_stats: Dict[str, Any], range_stats: Dict[str, Any]) -> str:
         # DEBUG lines are commented out for normal operation
         # logger.info("\n=== DEBUG in html_generator.generate ===")
         # logger.info(f"shows list has {len(shows)} items")
@@ -66,10 +67,7 @@ class HTMLGenerator:
         # else:
         #     logger.info("shows list is EMPTY!")
 
-        from sonarr_calendar.models import calculate_overall_statistics, calculate_completed_seasons_in_range
-
-        overall_stats = calculate_overall_statistics(shows, date_range)
-        # logger.info(f"DEBUG: overall_stats calculated, shows_complete = {overall_stats['shows_complete']}")
+        from sonarr_calendar.models import calculate_completed_seasons_in_range
 
         completed_seasons = calculate_completed_seasons_in_range(
             shows, episodes, date_range.start, date_range.end, sonarr_client
@@ -82,11 +80,12 @@ class HTMLGenerator:
             episodes=episodes,
             date_range=date_range,
             config=self.config,
-            version=__display_version__,  # <-- use display version with image type suffix
+            version=version,
             sonarr_icon_base64=SONARR_ICON_BASE64,
-            overall_stats=overall_stats,
+            library_stats=library_stats,
+            range_stats=range_stats,
             completed_seasons=completed_seasons,
             DISPLAY_EPISODES_LIMIT=2,
-            EPISODE_ITEM_HEIGHT=68,
+            EPISODE_ITEM_HEIGHT=80,
             EXPAND_BUTTON_HEIGHT=42
         )
