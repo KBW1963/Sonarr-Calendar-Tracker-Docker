@@ -40,6 +40,37 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
         all_series = sonarr.get_all_series()
         logger.info("✅ Loaded %d series", len(all_series))
 
+        # ---- Debug: print series status distribution ----
+        status_counts = {}
+        for s in all_series:
+            status = s.get('status', 'unknown')
+            status_counts[status] = status_counts.get(status, 0) + 1
+        logger.info("📊 Series status distribution:")
+        for status, count in status_counts.items():
+            logger.info(f"   {status}: {count}")
+
+        # Also count monitored/unmonitored series
+        monitored_series = sum(1 for s in all_series if s.get('monitored', False))
+        unmonitored_series = len(all_series) - monitored_series
+        logger.info(f"📊 Monitored series: {monitored_series}, Unmonitored series: {unmonitored_series}")
+
+        # ---- New summary statistics ----
+        logger.info("ℹ️  Counting ended/continuing series...")
+        ended_series = sum(1 for s in all_series if s.get('status') == 'ended')
+        continuing_series = sum(1 for s in all_series if s.get('status') != 'ended')
+        logger.info(f"   ended: {ended_series}, continuing: {continuing_series}")
+
+        logger.info("ℹ️  Fetching wanted missing episodes...")
+        wanted_missing = sonarr.get_wanted_missing(monitored=True)
+        missing_monitored_count = len(wanted_missing)
+        logger.info(f"✅ Found {missing_monitored_count} missing monitored episodes")
+
+        logger.info("ℹ️  Fetching future episodes...")
+        future_episodes = sonarr.get_future_episodes(years=5)
+        future_episodes_count = len(future_episodes)
+        logger.info(f"✅ Found {future_episodes_count} future episodes")
+        # ---------------------------------
+
         if config.enable_image_cache:
             logger.info("ℹ️  Caching images...")
             image_cache.download_all_posters(all_series)
@@ -50,6 +81,13 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
 
         # Calculate two sets of statistics
         library_stats = calculate_library_statistics(all_series)
+        # Add extra fields to library_stats
+        library_stats['ended_series'] = ended_series
+        library_stats['continuing_series'] = continuing_series
+        library_stats['missing_monitored'] = missing_monitored_count
+        library_stats['future_episodes'] = future_episodes_count
+
+        logger.info(f"LIBRARY STATS: total_episodes_all={library_stats['total_episodes_all']}, total_downloaded_all={library_stats['total_downloaded_all']}, overall_progress={library_stats['overall_progress']}")
         range_stats = calculate_overall_statistics(processed_shows, date_range)
 
         html_gen = HTMLGenerator(config)

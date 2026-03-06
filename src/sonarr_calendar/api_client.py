@@ -97,5 +97,48 @@ class SonarrClient:
             logger.error(f"Failed to fetch episodes for series {series_id}: {e}")
             return []
 
+    # ----------------------------------------------------------------------
+    # New methods for summary statistics
+    # ----------------------------------------------------------------------
+    def get_wanted_missing(self, monitored: bool = True) -> List[Dict]:
+        """
+        Fetch all wanted missing episodes (paginated).
+        Returns a list of episode dicts.
+        """
+        all_missing = []
+        page = 1
+        page_size = 1000
+        params = {'monitored': 'true' if monitored else 'false'}
+        while True:
+            params['page'] = page
+            params['pageSize'] = page_size
+            data = self._get('/api/v3/wanted/missing', params=params)
+            if not data:
+                break
+            records = data.get('records', [])
+            all_missing.extend(records)
+            if len(records) < page_size:
+                break
+            page += 1
+        return all_missing
+
+    def get_future_episodes(self, years: int = 5) -> List[Dict]:
+        """
+        Fetch all future episodes from today up to `years` ahead.
+        Returns a list of episode dicts.
+        """
+        today = datetime.now(timezone.utc)
+        start = today.isoformat()
+        end = (today + timedelta(days=years * 365)).isoformat()
+        params = {
+            'start': start,
+            'end': end,
+            'includeSeries': 'false',
+            'includeEpisodeFile': 'false',
+            'unmonitored': 'true'
+        }
+        data = self._get('/api/v3/calendar', params=params)
+        return data if data else []
+
     def close(self):
         self.session.close()

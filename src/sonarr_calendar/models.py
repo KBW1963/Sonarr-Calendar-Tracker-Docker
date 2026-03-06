@@ -350,9 +350,6 @@ def process_calendar_data(
         # Filter those within the date range (they already are, but ensure)
         in_range = [ep for ep in grouped_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
 
-        # Debug: log grouping results (uncomment if needed)
-        # logger.info(f"Series {series_id}: {len(grouped_episodes)} grouped items, {len(in_range)} in range, total indiv episodes {total_individual_episodes}")
-
         # Calculate progress for the series
         poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
         poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
@@ -455,24 +452,67 @@ def calculate_overall_statistics(shows: List[ProcessedShow], date_range) -> Dict
 def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
     """
     Calculate overall statistics across all series in the library.
-    Uses the raw API data, not just shows that have episodes in the date range.
+    Returns a dict with:
+        total_series
+        total_episodes_all
+        total_downloaded_all
+        total_seasons_all
+        monitored_seasons
+        unmonitored_seasons
+        overall_progress
+        total_monitored_episodes (or None if not available)
+        total_unmonitored_episodes (or None)
+        ended_series (count of series with status 'ended')
+        continuing_series (count of series with status 'continuing' or other non-ended/upcoming)
+        upcoming_series (count of series with status 'upcoming')
+        monitored_series (series-level monitored count)
+        unmonitored_series (series-level unmonitored count)
     """
     total_series = len(all_series)
 
     total_episodes_all = 0
     total_downloaded_all = 0
+    total_monitored_episodes = 0
     total_seasons_all = 0
     monitored_seasons = 0
     unmonitored_seasons = 0
+    monitored_episodes_available = True
+
+    ended_series = 0
+    continuing_series = 0
+    upcoming_series = 0
+    monitored_series = 0
+    unmonitored_series = 0
 
     for series in all_series:
-        # Use the same logic as in SeriesInfo.from_api but inline for efficiency
+        # Series-level monitoring
+        if series.get('monitored', False):
+            monitored_series += 1
+        else:
+            unmonitored_series += 1
+
+        # Status handling – now separate for 'upcoming'
+        status = series.get('status', '').lower()
+        if status == 'ended':
+            ended_series += 1
+        elif status == 'upcoming':
+            upcoming_series += 1
+        else:
+            # Includes 'continuing' and any other status (e.g., 'pilot') – count as continuing
+            continuing_series += 1
+
+        # Use statistics object
         stats = series.get('statistics', {})
-        episode_count = series.get('episodeCount') or stats.get('episodeCount', 0)
-        episode_file_count = series.get('episodeFileCount') or stats.get('episodeFileCount', 0)
+        episode_count = stats.get('totalEpisodeCount') or stats.get('episodeCount', 0)
+        episode_file_count = stats.get('episodeFileCount', 0)
+        monitored_ep_count = stats.get('monitoredEpisodeCount')
 
         total_episodes_all += episode_count
         total_downloaded_all += episode_file_count
+        if monitored_ep_count is not None:
+            total_monitored_episodes += monitored_ep_count
+        else:
+            monitored_episodes_available = False
 
         # Count seasons (excluding specials)
         seasons = series.get('seasons', [])
@@ -488,7 +528,7 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
 
     overall_progress = (total_downloaded_all / total_episodes_all * 100) if total_episodes_all else 0
 
-    return {
+    result = {
         'total_series': total_series,
         'total_episodes_all': total_episodes_all,
         'total_downloaded_all': total_downloaded_all,
@@ -496,7 +536,21 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
         'monitored_seasons': monitored_seasons,
         'unmonitored_seasons': unmonitored_seasons,
         'overall_progress': overall_progress,
+        'ended_series': ended_series,
+        'continuing_series': continuing_series,
+        'upcoming_series': upcoming_series,
+        'monitored_series': monitored_series,
+        'unmonitored_series': unmonitored_series,
     }
+
+    if monitored_episodes_available:
+        result['total_monitored_episodes'] = total_monitored_episodes
+        result['total_unmonitored_episodes'] = total_episodes_all - total_monitored_episodes
+    else:
+        result['total_monitored_episodes'] = None
+        result['total_unmonitored_episodes'] = None
+
+    return result
 
 def calculate_completed_seasons_in_range(
     shows: List[ProcessedShow],
