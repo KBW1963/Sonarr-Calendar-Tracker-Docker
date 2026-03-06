@@ -208,19 +208,24 @@
             justify-content: center;
             gap: 15px;
         }
-        .date-range {
-            text-align: center;
-            font-size: clamp(1rem, 4vw, 1.4rem);
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.1);
+
+        /* Library heading (styled like the date box) */
+        .library-heading {
+            background: rgba(255,255,255,0.1);
             padding: 10px 20px;
             border-radius: 10px;
+            backdrop-filter: blur(10px);
             display: inline-block;
             margin: 0 auto 20px;
-            backdrop-filter: blur(10px);
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            color: white;
+        /*    display: flex; */
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
         }
 
-        /* ---------- Summary Grid ---------- */
+        /* ---------- Summary Grid (Sentence Cards) ---------- */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -236,30 +241,45 @@
             background: var(--stat-bg);
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
+            text-align: left;  /* for sentence readability */
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
             transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 120px;
         }
         .summary-card:hover {
             transform: translateY(-5px);
         }
-        .summary-number {
-            font-size: 2.2em;
-            font-weight: bold;
-            margin-bottom: 8px;
+        .summary-card p {
+            margin: 0;
+            font-size: 1.1em;
+            line-height: 1.4;
             color: white;
         }
-        .summary-label {
-            font-size: 0.95em;
-            opacity: 0.9;
-            margin-bottom: 5px;
-            color: var(--text-secondary);
+        .summary-card strong {
+            color: var(--primary-color);
+            font-size: 1.2em;
         }
-        .summary-subtext {
-            font-size: 0.85em;
-            opacity: 0.7;
-            color: var(--text-secondary);
+        .summary-card .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            display: inline;
+        }
+
+        .date-range {
+            text-align: center;
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 0 auto 20px;
+            backdrop-filter: blur(10px);
         }
 
         .completed-seasons-section {
@@ -405,99 +425,114 @@
             color: var(--text-secondary);
         }
 
-        .filters {
+        /* Legend container (now inside filter bar) */
+        .legend-container {
             display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin: 25px 0;
             flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px 0 0;
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            width: 100%;
         }
-        .filter-btn {
-            padding: 12px 16px;
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: var(--legend-text-color);
+        }
+
+        .legend-bar {
+            width: 30px;
+            height: 12px;
+            border-radius: 6px;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            padding: 15px;
+            background: var(--filter-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            flex-direction: column;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .filter-group i {
+            color: var(--primary-color);
+        }
+
+        .filter-group input,
+        .filter-group select {
+            background: transparent;
             border: none;
+            color: var(--text-color);
+            outline: none;
+            padding: 8px 0;
+            font-size: 0.95em;
+        }
+
+        .filter-group input {
+            width: 180px;
+        }
+
+        .filter-group select {
+            cursor: pointer;
+            min-width: 180px;
+        }
+
+        .filter-group select option {
             background: var(--card-bg);
             color: var(--text-color);
+        }
+
+        .clear-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid var(--border-color);
-            font-size: 0.9em;
-            text-decoration: none;
-            display: inline-block;
             min-height: 44px;
-            min-width: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
-        .filter-btn:hover {
+
+        .clear-btn:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px var(--shadow-color);
         }
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        .filter-radio {
-            display: none;
-        }
-        #filter-all:checked ~ .shows-grid .show-card-wrapper,
-        #filter-all:checked ~ .shows-grid .show-card-wrapper .show-card {
-            display: block;
-        }
-        #filter-complete:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress] {
-            display: none;
-        }
-        #filter-complete:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress="100"] {
-            display: flex;
-        }
-        #filter-high-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress] {
-            display: none;
-        }
-        #filter-high-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="7"],
-        #filter-high-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="8"],
-        #filter-high-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="9"] {
-            display: flex;
-        }
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress] {
-            display: none;
-        }
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="2"],
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="3"],
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="4"],
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="5"],
-        #filter-medium-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="6"] {
-            display: flex;
-        }
-        #filter-low-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress] {
-            display: none;
-        }
-        #filter-low-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="1"],
-        #filter-low-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="2"],
-        #filter-low-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="3"],
-        #filter-low-progress:checked ~ .shows-grid .show-card-wrapper .show-card[data-progress^="4"] {
-            display: flex;
-        }
-        #filter-date-range-high:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress] {
-            display: none;
-        }
-        #filter-date-range-high:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress^="7"],
-        #filter-date-range-high:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress^="8"],
-        #filter-date-range-high:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress^="9"] {
-            display: flex;
-        }
-        #filter-date-range-low:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress] {
-            display: none;
-        }
-        #filter-date-range-low:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress^="1"],
-        #filter-date-range-low:checked ~ .shows-grid .show-card-wrapper .show-card[data-date-range-progress^="2"] {
-            display: flex;
-        }
-        #filter-has-episodes:checked ~ .shows-grid .show-card-wrapper .show-card {
-            display: none;
-        }
-        #filter-has-episodes:checked ~ .shows-grid .show-card-wrapper:has(.episode-item) {
-            display: block;
-        }
+
         .shows-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -986,25 +1021,6 @@
         .unmonitored-count {
             color: var(--progress-started);
         }
-        .progress-legend {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85em;
-            color: var(--legend-text-color);
-        }
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
         footer {
             text-align: center;
             padding: 30px;
@@ -1103,68 +1119,72 @@
             <i class="fas fa-arrow-up"></i>
         </a>
 
-        <input type="radio" name="filter" id="filter-all" class="filter-radio" checked>
-        <input type="radio" name="filter" id="filter-complete" class="filter-radio">
-        <input type="radio" name="filter" id="filter-high-progress" class="filter-radio">
-        <input type="radio" name="filter" id="filter-medium-progress" class="filter-radio">
-        <input type="radio" name="filter" id="filter-low-progress" class="filter-radio">
-        <input type="radio" name="filter" id="filter-date-range-high" class="filter-radio">
-        <input type="radio" name="filter" id="filter-date-range-low" class="filter-radio">
-        <input type="radio" name="filter" id="filter-has-episodes" class="filter-radio">
-
         <header>
-            <h1><i class="fas fa-tv"></i> {{ config.html_title }}</h1>
+            <h1><i class="fas fa-tv"></i> Upcoming TV Shows</h1>
+
+            <!-- Library heading -->
+            <div class="library-heading">
+                <i class="fas fa-book-open"></i> Your current library overview
+            </div>
+
+            <!-- First row: library stats -->
+            <div class="summary-grid">
+                <!-- Card 1: Shows & downloaded -->
+                <div class="summary-card">
+                    <p>
+                        You have <strong>{{ library_stats.total_series|default(0) }}</strong> shows,
+                        which have <strong>{{ library_stats.total_downloaded_all|default(0) }}</strong> episodes downloaded.
+                    </p>
+                </div>
+                <!-- Card 2: Missing monitored -->
+                <div class="summary-card">
+                    {% if library_stats.missing_monitored == 0 %}
+                        <p>There are currently no missing monitored episodes.</p>
+                    {% else %}
+                        <p>
+                            You have <strong>{{ library_stats.missing_monitored }}</strong> missing episodes
+                            for shows that are monitored.
+                        </p>
+                    {% endif %}
+                </div>
+                <!-- Card 3: Continuing vs Ended vs Upcoming -->
+                <div class="summary-card">
+                    <p>
+                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> series you are monitoring,
+                        there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing,
+                        <strong>{{ library_stats.ended_series|default(0) }}</strong> ended,
+                        and <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming.
+                    </p>
+                </div>
+                <!-- Card 4: Future episodes -->
+                <div class="summary-card">
+                    <p>
+                        There are <strong>{{ library_stats.future_episodes|default(0) }}</strong> future episodes scheduled.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Date range (between the two rows) -->
             <div class="date-range">
                 <i class="fas fa-calendar-alt"></i> Date Range: {{ date_range.start|format_date }} to {{ date_range.end|format_date }}
                 ({{ date_range.total_days }} days total)
             </div>
 
-            <!-- ========== Summary grid – uses range_stats ========== -->
-            <div class="summary-grid">
+            <!-- Second row: range stats (only two cards) -->
+            <div class="summary-grid" style="margin-top: 10px;">
+                <!-- Card 1: shows with episodes in range -->
                 <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.total_series }}</div>
-                    <div class="summary-label">Total Shows</div>
-                    <div class="summary-subtext">{{ range_stats.shows_with_episodes }} with episodes in range</div>
+                    <p>
+                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in range.
+                    </p>
                 </div>
+                <!-- Card 2: episodes in range with downloaded count -->
                 <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.episodes_in_range }}</div>
-                    <div class="summary-label">Episodes in Range</div>
-                    <div class="summary-subtext">{{ range_stats.downloaded_in_range }} downloaded</div>
+                    <p>
+                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in range with
+                        <strong>{{ range_stats.downloaded_in_range }}</strong> already downloaded.
+                    </p>
                 </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.shows_complete }}</div>
-                    <div class="summary-label">Shows with Completed Season</div>
-                    <div class="summary-subtext">Current season complete</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.shows_high_progress }}</div>
-                    <div class="summary-label">High Progress</div>
-                    <div class="summary-subtext">75-99% downloaded</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.shows_medium_progress }}</div>
-                    <div class="summary-label">Medium Progress</div>
-                    <div class="summary-subtext">25-74% downloaded</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.shows_low_progress }}</div>
-                    <div class="summary-label">Low Progress</div>
-                    <div class="summary-subtext">1-24% downloaded</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ range_stats.shows_not_started }}</div>
-                    <div class="summary-label">Not Started</div>
-                    <div class="summary-subtext">0% downloaded</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number">{{ completed_seasons|length }}</div>
-                    <div class="summary-label">Seasons Completed</div>
-                    <div class="summary-subtext">In date range</div>
-                </div>
-            </div>
-
-            <div style="margin-top: 25px; font-size: 0.9em; opacity: 0.9; text-align: center;">
-                * Unmonitored seasons are counted as 100% complete in progress calculations
             </div>
         </header>
 
@@ -1214,6 +1234,10 @@
                     {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
                     {{ library_stats.total_series }} series
                 </div>
+                <!-- Footnote moved here -->
+                <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    * Overall progress includes all episodes, whether monitored or not.
+                </div>
             </div>
 
             <div class="stat-progress">
@@ -1231,24 +1255,74 @@
             </div>
         </div>
 
-        <div class="filters">
-            <label for="filter-all" class="filter-btn active">All Shows ({{ range_stats.total_series }})</label>
-            <label for="filter-complete" class="filter-btn">Season Complete ({{ range_stats.shows_complete }})</label>
-            <label for="filter-high-progress" class="filter-btn">High Progress ({{ range_stats.shows_high_progress }})</label>
-            <label for="filter-medium-progress" class="filter-btn">Medium Progress ({{ range_stats.shows_medium_progress }})</label>
-            <label for="filter-low-progress" class="filter-btn">Low Progress ({{ range_stats.shows_low_progress }})</label>
-            <label for="filter-date-range-high" class="filter-btn">Date Range ≥75%</label>
-            <label for="filter-date-range-low" class="filter-btn">Date Range <25%</label>
-            <label for="filter-has-episodes" class="filter-btn">Has Episodes ({{ range_stats.shows_with_episodes }})</label>
-        </div>
+        <!-- Unified Filter Bar (with integrated legend) -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <!-- Search by title -->
+                <div class="filter-group">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="titleSearch" placeholder="Search shows...">
+                </div>
 
-        <div class="progress-legend">
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-complete);"></div><span>Complete (100%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-almost);"></div><span>Almost Complete (75-99%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-halfway);"></div><span>Halfway (50-74%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-started);"></div><span>Started (25-49%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-just-started);"></div><span>Just Started (1-24%)</span></div>
-            <div class="legend-item"><div class="legend-color" style="background: var(--progress-not-started);"></div><span>Not Started (0%)</span></div>
+                <!-- Progress filter dropdown -->
+                <div class="filter-group">
+                    <i class="fas fa-chart-line"></i>
+                    <select id="progressFilter">
+                        <option value="all" selected>All Shows ({{ range_stats.total_series }})</option>
+                        <option value="complete">Season Complete ({{ range_stats.shows_complete }})</option>
+                        <option value="high">High Progress ({{ range_stats.shows_high_progress }})</option>
+                        <option value="medium">Medium Progress ({{ range_stats.shows_medium_progress }})</option>
+                        <option value="low">Low Progress ({{ range_stats.shows_low_progress }})</option>
+                        <option value="date-high">Date Range ≥75%</option>
+                        <option value="date-low">Date Range <25%</option>
+                        <option value="has-episodes">Has Episodes ({{ range_stats.shows_with_episodes }})</option>
+                    </select>
+                </div>
+
+                <!-- Jump to show dropdown -->
+                <div class="filter-group">
+                    <i class="fas fa-film"></i>
+                    <select id="jumpToShow" class="show-filter" onchange="window.location.href=this.value">
+                        <option value="#all" selected>Jump to show…</option>
+                        {% for show in shows %}
+                        <option value="#show-{{ show.series_id }}">{{ show.title|truncate(30) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Clear Filters button -->
+                <button id="clearFilters" class="clear-btn">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+
+            <!-- Legend container inside filter bar as footer -->
+            <div class="legend-container">
+                <div class="legend-item" title="All episodes downloaded">
+                    <div class="legend-bar" style="background: var(--progress-complete);"></div>
+                    <span>Complete (100%)</span>
+                </div>
+                <div class="legend-item" title="75‑99% downloaded">
+                    <div class="legend-bar" style="background: var(--progress-almost);"></div>
+                    <span>Almost Complete (75‑99%)</span>
+                </div>
+                <div class="legend-item" title="50‑74% downloaded">
+                    <div class="legend-bar" style="background: var(--progress-halfway);"></div>
+                    <span>Halfway (50‑74%)</span>
+                </div>
+                <div class="legend-item" title="25‑49% downloaded">
+                    <div class="legend-bar" style="background: var(--progress-started);"></div>
+                    <span>Started (25‑49%)</span>
+                </div>
+                <div class="legend-item" title="1‑24% downloaded">
+                    <div class="legend-bar" style="background: var(--progress-just-started);"></div>
+                    <span>Just Started (1‑24%)</span>
+                </div>
+                <div class="legend-item" title="No episodes downloaded">
+                    <div class="legend-bar" style="background: var(--progress-not-started);"></div>
+                    <span>Not Started (0%)</span>
+                </div>
+            </div>
         </div>
 
         <div class="shows-grid" id="showsGrid">
@@ -1256,7 +1330,11 @@
                 {% for show in shows %}
                 <div id="show-{{ show.series_id }}" class="show-card-wrapper" data-show-id="{{ show.series_id }}">
                     <a href="{{ config.sonarr_url }}/series/{{ show.title|slugify }}" target="_blank" class="show-card-link">
-                        <div class="show-card" data-progress="{{ show.progress_percentage }}" data-date-range-progress="{{ show.date_range_percentage }}">
+                        <div class="show-card" 
+                             data-progress="{{ show.progress_percentage }}" 
+                             data-date-range-progress="{{ show.date_range_percentage }}"
+                             data-has-episodes="{{ 'true' if show.date_range_episodes > 0 else 'false' }}"
+                             data-season-complete="{{ 'true' if show.current_season_complete else 'false' }}">
                             <div class="card-header">
                                 {% if show.poster_url %}
                                 <div class="poster-container">
@@ -1551,6 +1629,79 @@
             }
         }
 
+        // Combined filter function (search + progress)
+        function applyFilters() {
+            const searchTerm = document.getElementById('titleSearch').value.toLowerCase();
+            const progressFilter = document.getElementById('progressFilter').value;
+
+            document.querySelectorAll('.show-card-wrapper').forEach(wrapper => {
+                const card = wrapper.querySelector('.show-card');
+                if (!card) return;
+
+                // Search filter
+                const title = wrapper.querySelector('.show-title')?.textContent.toLowerCase() || '';
+                const matchesSearch = title.includes(searchTerm);
+
+                // Progress filter
+                let matchesProgress = true;
+                if (progressFilter !== 'all') {
+                    const progress = parseFloat(card.dataset.progress);
+                    const dateRangeProgress = parseFloat(card.dataset.dateRangeProgress);
+                    const hasEpisodes = card.dataset.hasEpisodes === 'true';
+                    const seasonComplete = card.dataset.seasonComplete === 'true';
+
+                    switch (progressFilter) {
+                        case 'complete':
+                            matchesProgress = seasonComplete;
+                            break;
+                        case 'high':
+                            matchesProgress = progress >= 75 && progress < 100;
+                            break;
+                        case 'medium':
+                            matchesProgress = progress >= 25 && progress < 75;
+                            break;
+                        case 'low':
+                            matchesProgress = progress > 0 && progress < 25;
+                            break;
+                        case 'date-high':
+                            matchesProgress = dateRangeProgress >= 75;
+                            break;
+                        case 'date-low':
+                            matchesProgress = dateRangeProgress < 25 && dateRangeProgress > 0;
+                            break;
+                        case 'has-episodes':
+                            matchesProgress = hasEpisodes;
+                            break;
+                        default:
+                            matchesProgress = true;
+                    }
+                }
+
+                wrapper.style.display = (matchesSearch && matchesProgress) ? 'block' : 'none';
+            });
+        }
+
+        // Title search
+        document.getElementById('titleSearch').addEventListener('input', applyFilters);
+
+        // Progress filter dropdown
+        document.getElementById('progressFilter').addEventListener('change', applyFilters);
+
+        // Clear filters – also reset jump dropdown
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            // Clear search
+            document.getElementById('titleSearch').value = '';
+            // Reset progress filter to "all"
+            document.getElementById('progressFilter').value = 'all';
+            // Reset jump dropdown to default
+            const jumpSelect = document.getElementById('jumpToShow');
+            if (jumpSelect) {
+                jumpSelect.value = '#all';
+            }
+            // Apply filters (will show all)
+            applyFilters();
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('sonarr-theme') || '{{ config.html_theme }}';
             document.body.classList.add('theme-' + savedTheme);
@@ -1563,14 +1714,6 @@
                 document.body.classList.add('theme-' + newTheme);
                 localStorage.setItem('sonarr-theme', newTheme);
                 updateThemeButton(newTheme);
-            });
-
-            document.querySelectorAll('.filter-radio').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                    const label = document.querySelector('label[for="' + this.id + '"]');
-                    if (label) label.classList.add('active');
-                });
             });
 
             setupExpandButtons();
