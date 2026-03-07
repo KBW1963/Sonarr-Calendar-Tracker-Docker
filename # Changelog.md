@@ -8,6 +8,15 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 ---
 
 ## [3.4.0] - 2026-03-06
+### Changed
+
+- **Badge Styling** – Moved episode badge inline styles to dedicated CSS classes (`.badge-premiere`, `.badge-season-finale`, etc.). This improves maintainability and reduces inline style calculations.
+- **Dot Color** – The small status dot now reflects **date range progress** instead of overall progress, making it clear whether episodes in the current range are downloaded.
+- **Filter Dropdown Labels** – Clarified overall vs. date range progress filters and updated counts to match visible shows.
+
+### Fixed
+
+- **Filter Consistency** – All progress filters now correctly apply to the visible shows (those with episodes in the selected date range).
 
 ### Changed
 
@@ -264,3 +273,4 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - NameError in connection test (moved requests import inside class).
 
 _Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
+
