@@ -105,7 +105,6 @@ services:
       - IMAGE_CACHE_DIR=/cache                            # default: sonarr_images
       - REFRESH_INTERVAL_HOURS=6                          # default: 6
       - HTML_THEME=dark                                   # default: dark
-      - GRID_COLUMNS=4                                    # default: 4
       - IMAGE_QUALITY=fanart                              # default: fanart
       - ENABLE_IMAGE_CACHE=true                           # default: true
       - HTML_TITLE="My Sonarr Dashboard"                  # default: Sonarr Calendar Pro
@@ -141,6 +140,7 @@ View logs
 ```
 docker-compose logs -f
 ```
+
 
 
 
