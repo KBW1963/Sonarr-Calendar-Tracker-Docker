@@ -7,7 +7,6 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,{{ sonarr_icon_base64 }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* (all existing styles remain unchanged) */
         :root {
             --primary-color: #00b4db;
             --primary-dark: #0083b0;
@@ -40,6 +39,62 @@
             --midseason-finale-color: #FF8C00;
             --series-premiere-color: #FFD700;
             --special-color: #9C27B0;
+        }
+
+        /* Badge classes – using CSS variables for colors */
+        .episode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            vertical-align: middle;
+            white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        .episode-badge i {
+            font-size: 0.8em;
+        }
+        .badge-premiere {
+            background: var(--premiere-color)20;
+            color: var(--premiere-color);
+            border: 1px solid var(--premiere-color)40;
+        }
+        .badge-season-finale {
+            background: var(--season-finale-color)20;
+            color: var(--season-finale-color);
+            border: 1px solid var(--season-finale-color)40;
+        }
+        .badge-series-finale {
+            background: var(--series-finale-color)20;
+            color: var(--series-finale-color);
+            border: 1px solid var(--series-finale-color)40;
+        }
+        .badge-midseason-premiere {
+            background: var(--midseason-premiere-color)20;
+            color: var(--midseason-premiere-color);
+            border: 1px solid var(--midseason-premiere-color)40;
+        }
+        .badge-midseason-finale {
+            background: var(--midseason-finale-color)20;
+            color: var(--midseason-finale-color);
+            border: 1px solid var(--midseason-finale-color)40;
+        }
+        .badge-series-premiere {
+            background: var(--series-premiere-color)20;
+            color: var(--series-premiere-color);
+            border: 1px solid var(--series-premiere-color)40;
+        }
+        .badge-special {
+            background: var(--special-color)20;
+            color: var(--special-color);
+            border: 1px solid var(--special-color)40;
         }
 
         .theme-light {
@@ -220,7 +275,7 @@
             margin: 0 auto 20px;
             font-size: clamp(1rem, 4vw, 1.4rem);
             color: white;
-            /* display: flex; */
+            /* display: flex;*/
             align-items: center;
             gap: 8px;
             width: fit-content;
@@ -758,60 +813,6 @@
         .episode-item.episode-special {
             border-left-color: var(--special-color) !important;
         }
-        .episode-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 600;
-            vertical-align: middle;
-            white-space: nowrap;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-left: auto;
-            margin-right: 0;
-        }
-        .episode-badge i {
-            font-size: 0.8em;
-        }
-        .episode-badge.premiere {
-            background: var(--premiere-color)20;
-            color: var(--premiere-color);
-            border: 1px solid var(--premiere-color)40;
-        }
-        .episode-badge.season-finale {
-            background: var(--season-finale-color)20;
-            color: var(--season-finale-color);
-            border: 1px solid var(--season-finale-color)40;
-        }
-        .episode-badge.series-finale {
-            background: var(--series-finale-color)20;
-            color: var(--series-finale-color);
-            border: 1px solid var(--series-finale-color)40;
-        }
-        .episode-badge.midseason-premiere {
-            background: var(--midseason-premiere-color)20;
-            color: var(--midseason-premiere-color);
-            border: 1px solid var(--midseason-premiere-color)40;
-        }
-        .episode-badge.midseason-finale {
-            background: var(--midseason-finale-color)20;
-            color: var(--midseason-finale-color);
-            border: 1px solid var(--midseason-finale-color)40;
-        }
-        .episode-badge.series-premiere {
-            background: var(--series-premiere-color)20;
-            color: var(--series-premiere-color);
-            border: 1px solid var(--series-premiere-color)40;
-        }
-        .episode-badge.special {
-            background: var(--special-color)20;
-            color: var(--special-color);
-            border: 1px solid var(--special-color)40;
-        }
         .episode-item.padding-item {
             background: rgba(255, 255, 255, 0.03);
             border-left-color: transparent;
@@ -1151,10 +1152,9 @@
                 <!-- Card 3: Continuing vs Ended vs Upcoming -->
                 <div class="summary-card">
                     <p>
-                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
-                        there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing,
-                        <strong>{{ library_stats.ended_series|default(0) }}</strong> ended,
-                        and <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming.
+                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> show in your library,
+                        there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing (including <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming), and 
+                        <strong>{{ library_stats.ended_series|default(0) }}</strong> have ended.
                     </p>
                 </div>
                 <!-- Card 4: Future episodes -->
@@ -1176,14 +1176,14 @@
                 <!-- Card 1: shows with episodes in range -->
                 <div class="summary-card">
                     <p>
-                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in set date range.
+                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in specified date range.
                     </p>
                 </div>
                 <!-- Card 2: episodes in range with downloaded count -->
                 <div class="summary-card">
                     <p>
-                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in set date range with
-                        <strong>{{ range_stats.downloaded_in_range }}</strong> episodes already downloaded.
+                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in specified date range with
+                        <strong>{{ range_stats.downloaded_in_range }}</strong> already downloaded.
                     </p>
                 </div>
             </div>
@@ -1265,7 +1265,7 @@
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                <!-- Progress filter dropdown (UPDATED with range_stats counts) -->
+                <!-- Progress filter dropdown -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
@@ -1386,7 +1386,8 @@
                                                 <div class="episode-title">
                                                     <span>{{ ep.title|truncate(25) }}</span>
                                                     {% if badge %}
-                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                    <!-- Using CSS classes instead of inline styles -->
+                                                    <span class="episode-badge badge-{{ badge.type }}" title="{{ badge.text }}">
                                                         <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                     </span>
                                                     {% endif %}
@@ -1402,7 +1403,7 @@
                                                 <div class="episode-titles">
                                                     {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
                                                     {% if badge %}
-                                                    <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                    <span class="episode-badge badge-{{ badge.type }}" title="{{ badge.text }}">
                                                         <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                     </span>
                                                     {% endif %}
@@ -1433,7 +1434,7 @@
                                                     <div class="episode-title">
                                                         <span>{{ ep.title|truncate(25) }}</span>
                                                         {% if badge %}
-                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                        <span class="episode-badge badge-{{ badge.type }}" title="{{ badge.text }}">
                                                             <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                         </span>
                                                         {% endif %}
@@ -1449,7 +1450,7 @@
                                                     <div class="episode-titles">
                                                         {{ ep.titles_display }} ({{ ep.individual_episode_count }} eps)
                                                         {% if badge %}
-                                                        <span class="episode-badge {{ badge.type }}" style="background: {{ badge.color }}20; color: {{ badge.color }}; border: 1px solid {{ badge.color }}40;" title="{{ badge.text }}">
+                                                        <span class="episode-badge badge-{{ badge.type }}" title="{{ badge.text }}">
                                                             <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                         </span>
                                                         {% endif %}
