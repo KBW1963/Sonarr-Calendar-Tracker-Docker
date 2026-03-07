@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,{{ sonarr_icon_base64 }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (all existing styles remain unchanged – same as previous version) */
         :root {
             --primary-color: #00b4db;
             --primary-dark: #0083b0;
@@ -41,61 +42,20 @@
             --special-color: #9C27B0;
         }
 
-        /* Badge classes – using CSS variables for colors */
+        .badge-premiere { background: var(--premiere-color)20; color: var(--premiere-color); border: 1px solid var(--premiere-color)40; }
+        .badge-season-finale { background: var(--season-finale-color)20; color: var(--season-finale-color); border: 1px solid var(--season-finale-color)40; }
+        .badge-series-finale { background: var(--series-finale-color)20; color: var(--series-finale-color); border: 1px solid var(--series-finale-color)40; }
+        .badge-midseason-premiere { background: var(--midseason-premiere-color)20; color: var(--midseason-premiere-color); border: 1px solid var(--midseason-premiere-color)40; }
+        .badge-midseason-finale { background: var(--midseason-finale-color)20; color: var(--midseason-finale-color); border: 1px solid var(--midseason-finale-color)40; }
+        .badge-series-premiere { background: var(--series-premiere-color)20; color: var(--series-premiere-color); border: 1px solid var(--series-premiere-color)40; }
+        .badge-special { background: var(--special-color)20; color: var(--special-color); border: 1px solid var(--special-color)40; }
+
         .episode-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 0.7em;
-            font-weight: 600;
-            vertical-align: middle;
-            white-space: nowrap;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-left: auto;
-            margin-right: 0;
+            display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 12px;
+            font-size: 0.7em; font-weight: 600; vertical-align: middle; white-space: nowrap;
+            max-width: 120px; overflow: hidden; text-overflow: ellipsis; margin-left: auto; margin-right: 0;
         }
-        .episode-badge i {
-            font-size: 0.8em;
-        }
-        .badge-premiere {
-            background: var(--premiere-color)20;
-            color: var(--premiere-color);
-            border: 1px solid var(--premiere-color)40;
-        }
-        .badge-season-finale {
-            background: var(--season-finale-color)20;
-            color: var(--season-finale-color);
-            border: 1px solid var(--season-finale-color)40;
-        }
-        .badge-series-finale {
-            background: var(--series-finale-color)20;
-            color: var(--series-finale-color);
-            border: 1px solid var(--series-finale-color)40;
-        }
-        .badge-midseason-premiere {
-            background: var(--midseason-premiere-color)20;
-            color: var(--midseason-premiere-color);
-            border: 1px solid var(--midseason-premiere-color)40;
-        }
-        .badge-midseason-finale {
-            background: var(--midseason-finale-color)20;
-            color: var(--midseason-finale-color);
-            border: 1px solid var(--midseason-finale-color)40;
-        }
-        .badge-series-premiere {
-            background: var(--series-premiere-color)20;
-            color: var(--series-premiere-color);
-            border: 1px solid var(--series-premiere-color)40;
-        }
-        .badge-special {
-            background: var(--special-color)20;
-            color: var(--special-color);
-            border: 1px solid var(--special-color)40;
-        }
+        .episode-badge i { font-size: 0.8em; }
 
         .theme-light {
             --background-color: #F5F5F5;
@@ -275,7 +235,7 @@
             margin: 0 auto 20px;
             font-size: clamp(1rem, 4vw, 1.4rem);
             color: white;
-            /* display: flex;*/
+            /* display: flex; */
             align-items: center;
             gap: 8px;
             width: fit-content;
@@ -1121,7 +1081,7 @@
             <i class="fas fa-arrow-up"></i>
         </a>
 
-        <header>
+          <header>
             <h1><i class="fas fa-tv"></i> Upcoming TV Shows</h1>
 
             <!-- Library heading -->
@@ -1152,7 +1112,7 @@
                 <!-- Card 3: Continuing vs Ended vs Upcoming -->
                 <div class="summary-card">
                     <p>
-                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> show in your library,
+                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
                         there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing (including <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming), and 
                         <strong>{{ library_stats.ended_series|default(0) }}</strong> have ended.
                     </p>
@@ -1182,8 +1142,8 @@
                 <!-- Card 2: episodes in range with downloaded count -->
                 <div class="summary-card">
                     <p>
-                        <strong>{{ range_stats.episodes_in_range }}</strong> episodes in specified date range with
-                        <strong>{{ range_stats.downloaded_in_range }}</strong> already downloaded.
+                        There are <strong>{{ range_stats.episodes_in_range }}</strong> episodes in specified date range with
+                        <strong>{{ range_stats.downloaded_in_range }}</strong> episodes already downloaded.
                     </p>
                 </div>
             </div>
@@ -1373,7 +1333,7 @@
                                     <div class="episodes-list" id="episodes-list-{{ show.series_id }}">
                                         {# Preview episodes (first DISPLAY_EPISODES_LIMIT) #}
                                         {% for ep in show.episodes_in_range[:DISPLAY_EPISODES_LIMIT] %}
-                                            {% set status_class = 'status-downloaded' if ep.has_file else ('status-monitored' if ep.monitored else 'status-missing') %}
+                                            {% set status_class = get_episode_status_class(ep) %}
                                             {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
                                             {% set extra_class = 'episode-special' if badge and badge.type == 'special' else '' %}
                                             {% if ep.single_episode %}
@@ -1386,7 +1346,6 @@
                                                 <div class="episode-title">
                                                     <span>{{ ep.title|truncate(25) }}</span>
                                                     {% if badge %}
-                                                    <!-- Using CSS classes instead of inline styles -->
                                                     <span class="episode-badge badge-{{ badge.type }}" title="{{ badge.text }}">
                                                         <i class="fas {{ badge.icon }}"></i> {{ badge.text }}
                                                     </span>
@@ -1421,7 +1380,7 @@
                                         {# Hidden container for additional episodes #}
                                         <div class="all-episodes-container" id="all-episodes-{{ show.series_id }}" style="display: none;">
                                             {% for ep in show.episodes_in_range[DISPLAY_EPISODES_LIMIT:] %}
-                                                {% set status_class = 'status-downloaded' if ep.has_file else ('status-monitored' if ep.monitored else 'status-missing') %}
+                                                {% set status_class = get_episode_status_class(ep) %}
                                                 {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
                                                 {% set extra_class = 'episode-special' if badge and badge.type == 'special' else '' %}
                                                 {% if ep.single_episode %}
