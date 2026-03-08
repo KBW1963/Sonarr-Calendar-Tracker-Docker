@@ -1,4 +1,5 @@
 ![Sonarr](https://img.shields.io/badge/Sonarr-v3%2Fv4-orange)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -180,6 +181,7 @@ nginx:
     - sonarr-calendar
 ```
 Then access `http://your-host-ip:8080/UpcomingTV.html`.
+
 
 
 
