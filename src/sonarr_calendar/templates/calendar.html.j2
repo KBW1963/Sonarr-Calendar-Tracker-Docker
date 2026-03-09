@@ -237,6 +237,8 @@
             color: white;
             text-align: left;
             margin-bottom: 20px;
+            max-width: 100%;
+            flex-wrap: wrap;
         }
 
         /* ---------- Summary Grid (Sentence Cards) ---------- */
@@ -294,6 +296,8 @@
             display: inline-block;
             margin: 0 auto 20px;
             backdrop-filter: blur(10px);
+            max-width: 100%;
+            word-break: break-word;
         }
 
         .completed-seasons-section {
@@ -314,8 +318,14 @@
         }
         .completed-seasons-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
+        }
+        /* On very small screens, force single column */
+        @media (max-width: 400px) {
+            .completed-seasons-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .show-card-wrapper {
             display: block;
@@ -376,6 +386,7 @@
         }
         .completed-season-info {
             flex-grow: 1;
+            min-width: 0; /* allow text truncation */
         }
         .completed-season-title {
             font-weight: 600;
@@ -439,7 +450,7 @@
             color: var(--text-secondary);
         }
 
-        /* Legend container (inside filter bar) */
+        /* Legend container (clickable items) */
         .legend-container {
             display: flex;
             flex-wrap: wrap;
@@ -457,6 +468,11 @@
             gap: 8px;
             font-size: 0.9em;
             color: var(--legend-text-color);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .legend-item:hover {
+            opacity: 0.8;
         }
 
         .legend-bar {
@@ -497,6 +513,8 @@
             padding: 5px 15px;
             border-radius: 20px;
             border: 2px solid var(--border-color);
+            flex: 1 1 auto;
+            min-width: 200px;
         }
 
         .filter-group i {
@@ -511,12 +529,12 @@
             outline: none;
             padding: 8px 0;
             font-size: 0.95em;
+            width: 100%;
         }
 
         .filter-group input {
             width: 180px;
         }
-
         .filter-group select {
             cursor: pointer;
             min-width: 180px;
@@ -540,11 +558,31 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .clear-btn:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
+        }
+
+        /* Mobile filter bar adjustments */
+        @media (max-width: 600px) {
+            .filter-row {
+                flex-direction: column;
+                width: 100%;
+            }
+            .filter-group {
+                width: 100%;
+            }
+            .filter-group input,
+            .filter-group select {
+                width: 100%;
+            }
+            .clear-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         /* Reduce spacing between show meta and genres */
@@ -933,6 +971,8 @@
             font-weight: 600;
             font-size: 0.9em;
             color: var(--text-color);
+            flex-wrap: wrap;
+            gap: 5px;
         }
         .progress-bar {
             height: 10px;
@@ -1062,6 +1102,51 @@
         img {
             max-width: 100%;
             height: auto;
+        }
+
+        /* Small screen adjustments */
+        @media (max-width: 600px) {
+            .summary-card p {
+                font-size: 0.95em;
+            }
+            .summary-card strong {
+                font-size: 1.1em;
+            }
+            .card-content {
+                padding: 12px;
+            }
+            .episode-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+            .episode-days {
+                align-self: flex-start;
+            }
+            .legend-container {
+                gap: 10px;
+            }
+            .legend-item {
+                font-size: 0.8em;
+            }
+            .legend-bar {
+                width: 20px;
+            }
+        }
+        @media (max-width: 400px) {
+            .completed-season-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            .completed-season-poster {
+                margin-bottom: 10px;
+            }
+            .completed-season-info {
+                width: 100%;
+            }
+            .completed-season-title {
+                white-space: normal;
+            }
         }
     </style>
 </head>
@@ -1253,29 +1338,29 @@
                 </button>
             </div>
 
-            <!-- Legend container -->
+            <!-- Legend container (clickable items) -->
             <div class="legend-container">
-                <div class="legend-item" title="All episodes downloaded">
+                <div class="legend-item" data-filter="complete" title="All episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-complete);"></div>
                     <span>Complete (100%)</span>
                 </div>
-                <div class="legend-item" title="75‑99% downloaded">
+                <div class="legend-item" data-filter="season-high" title="75‑99% downloaded">
                     <div class="legend-bar" style="background: var(--progress-almost);"></div>
                     <span>Almost Complete (75‑99%)</span>
                 </div>
-                <div class="legend-item" title="50‑74% downloaded">
+                <div class="legend-item" data-filter="season-medium" title="50‑74% downloaded">
                     <div class="legend-bar" style="background: var(--progress-halfway);"></div>
                     <span>Halfway (50‑74%)</span>
                 </div>
-                <div class="legend-item" title="25‑49% downloaded">
+                <div class="legend-item" data-filter="season-low" title="25‑49% downloaded">
                     <div class="legend-bar" style="background: var(--progress-started);"></div>
                     <span>Started (25‑49%)</span>
                 </div>
-                <div class="legend-item" title="1‑24% downloaded">
+                <div class="legend-item" data-filter="season-low" title="1‑24% downloaded">
                     <div class="legend-bar" style="background: var(--progress-just-started);"></div>
                     <span>Just Started (1‑24%)</span>
                 </div>
-                <div class="legend-item" title="No episodes downloaded">
+                <div class="legend-item" data-filter="season-low" title="No episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-not-started);"></div>
                     <span>Not Started (0%)</span>
                 </div>
@@ -1447,10 +1532,10 @@
                                 </div>
 
                                 <div class="progress-section">
-                                    <!-- Date Range Progress (now first) -->
+                                    <!-- Date Range Progress (now first) with calendar icon -->
                                     <div class="progress-item">
                                         <div class="progress-header">
-                                            <span>Date Range Progress</span>
+                                            <span><i class="fas fa-calendar-alt" style="margin-right: 5px;"></i> Date Range Progress</span>
                                             <span class="progress-percentage">{{ "%.1f"|format(show.date_range_percentage) }}%</span>
                                         </div>
                                         <div class="progress-bar">
@@ -1696,6 +1781,18 @@
             const jumpSelect = document.getElementById('jumpToShow');
             if (jumpSelect) jumpSelect.value = '#all';
             applyFilters();
+        });
+
+        // Make legend items clickable
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const filterValue = this.dataset.filter;
+                const select = document.getElementById('progressFilter');
+                if (filterValue && select) {
+                    select.value = filterValue;
+                    applyFilters();
+                }
+            });
         });
 
         document.addEventListener('DOMContentLoaded', function() {
