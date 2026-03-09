@@ -205,6 +205,7 @@ class ProcessedShow:
     date_range_downloaded: int = 0
     date_range_percentage: float = 0.0
     date_range_color: str = "#F44336"
+    next_episode_timestamp: int = 9999999999  # Unix timestamp for sorting (default large)
 
 # ============================================================================
 # Helper functions
@@ -372,6 +373,22 @@ def process_calendar_data(
         # Count only regular seasons (season number > 0)
         total_seasons = sum(1 for s in series.seasons if s.get('seasonNumber', 0) > 0)
 
+        # Determine next episode timestamp (for sorting)
+        next_ts = 9999999999
+        if in_range:
+            # Get the earliest future episode (air_date >= today) or the earliest overall
+            today = datetime.now(timezone.utc).date()
+            future_eps = [ep for ep in in_range if ep.air_date and ep.air_date >= today]
+            if future_eps:
+                earliest = min(future_eps, key=lambda e: e.air_date).air_date
+            else:
+                earliest = min(in_range, key=lambda e: e.air_date).air_date
+            # Convert to timestamp (Unix seconds) – use date at midnight UTC
+            dt = datetime.combine(earliest, datetime.min.time(), tzinfo=timezone.utc)
+            next_ts = int(dt.timestamp())
+        else:
+            next_ts = 9999999999
+
         processed.append(ProcessedShow(
             series_id=series_id,
             title=series.title,
@@ -399,7 +416,8 @@ def process_calendar_data(
             date_range_episodes=total_individual_episodes,
             date_range_downloaded=range_downloaded,
             date_range_percentage=range_percent,
-            date_range_color=range_color
+            date_range_color=range_color,
+            next_episode_timestamp=next_ts
         ))
 
     processed.sort(key=lambda x: (-x.date_range_percentage, x.title))
@@ -462,11 +480,15 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
         overall_progress
         total_monitored_episodes (or None if not available)
         total_unmonitored_episodes (or None)
-        ended_series (count of series with status 'ended')
-        continuing_series (count of series with status 'continuing' or other non-ended/upcoming)
-        upcoming_series (count of series with status 'upcoming')
-        monitored_series (series-level monitored count)
-        unmonitored_series (series-level unmonitored count)
+        ended_series
+        continuing_series
+        upcoming_series
+        monitored_series
+        unmonitored_series
+        shows_high_progress   # count of series with progress 75-99%
+        shows_medium_progress # count with progress 25-74%
+        shows_low_progress    # count with progress 1-24%
+        shows_not_started     # count with progress 0%
     """
     total_series = len(all_series)
 
@@ -484,6 +506,12 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
     monitored_series = 0
     unmonitored_series = 0
 
+    # Counters for progress categories
+    shows_high = 0
+    shows_medium = 0
+    shows_low = 0
+    shows_not_started = 0
+
     for series in all_series:
         # Series-level monitoring
         if series.get('monitored', False):
@@ -491,14 +519,13 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
         else:
             unmonitored_series += 1
 
-        # Status handling – now separate for 'upcoming'
+        # Status handling
         status = series.get('status', '').lower()
         if status == 'ended':
             ended_series += 1
         elif status == 'upcoming':
             upcoming_series += 1
         else:
-            # Includes 'continuing' and any other status (e.g., 'pilot') – count as continuing
             continuing_series += 1
 
         # Use statistics object
@@ -526,6 +553,21 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
             else:
                 unmonitored_seasons += 1
 
+        # Compute progress percentage for this series
+        if episode_count > 0:
+            progress = (episode_file_count / episode_count) * 100
+        else:
+            progress = 0
+
+        if progress >= 75:
+            shows_high += 1
+        elif progress >= 25:
+            shows_medium += 1
+        elif progress > 0:
+            shows_low += 1
+        else:
+            shows_not_started += 1
+
     overall_progress = (total_downloaded_all / total_episodes_all * 100) if total_episodes_all else 0
 
     result = {
@@ -541,6 +583,10 @@ def calculate_library_statistics(all_series: List[Dict]) -> Dict[str, Any]:
         'upcoming_series': upcoming_series,
         'monitored_series': monitored_series,
         'unmonitored_series': unmonitored_series,
+        'shows_high_progress': shows_high,
+        'shows_medium_progress': shows_medium,
+        'shows_low_progress': shows_low,
+        'shows_not_started': shows_not_started,
     }
 
     if monitored_episodes_available:
