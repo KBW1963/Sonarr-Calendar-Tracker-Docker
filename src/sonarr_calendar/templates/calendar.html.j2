@@ -224,22 +224,19 @@
             gap: 15px;
         }
 
-        /* Library heading – now left‑aligned */
-      /* Library heading (styled like the date box) */
         .library-heading {
             background: rgba(255,255,255,0.1);
             padding: 10px 20px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
-            display: inline-block;
-            margin: 0 auto 20px;
-            font-size: clamp(1rem, 4vw, 1.4rem);
-            color: white;
-            /* display: flex; */
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            width: fit-content;
-        }
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            color: white;
+            text-align: left;
+            margin-bottom: 20px;
+}
 
         /* ---------- Summary Grid (Sentence Cards) ---------- */
         .summary-grid {
@@ -257,7 +254,7 @@
             background: var(--stat-bg);
             padding: 20px;
             border-radius: 10px;
-            text-align: left;  /* for sentence readability */
+            text-align: left;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
             transition: transform 0.3s ease;
@@ -441,7 +438,7 @@
             color: var(--text-secondary);
         }
 
-        /* Legend container (now inside filter bar) */
+        /* Legend container (inside filter bar) */
         .legend-container {
             display: flex;
             flex-wrap: wrap;
@@ -551,10 +548,10 @@
 
         /* Reduce spacing between show meta and genres */
         .show-meta {
-            margin-bottom: 10px;  /* slightly reduced from 20px */
+            margin-bottom: 10px;
         }
         .show-meta + .genres {
-            margin-top: -10px;    /* pull genres up closer */
+            margin-top: -10px;
         }
 
         .shows-grid {
@@ -707,7 +704,7 @@
         .show-meta {
             color: var(--primary-color);
             font-size: 0.9em;
-            margin-bottom: 10px;  /* reduced from 20px */
+            margin-bottom: 10px;
             min-height: 1.5em;
             white-space: nowrap;
             overflow: hidden;
@@ -727,7 +724,7 @@
             padding-bottom: 5px;
         }
         .episodes-list {
-            overflow-y: hidden; /* no scroll when collapsed */
+            overflow-y: hidden;
             padding-right: 5px;
             -webkit-overflow-scrolling: touch;
             transition: max-height 0.3s ease;
@@ -959,7 +956,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
-            margin: 0 0 15px 0;  /* adjusted to reduce top spacing */
+            margin: 0 0 15px 0;
             min-width: 0;
         }
         .genre-tag {
@@ -1092,21 +1089,19 @@
         <header>
             <h1><i class="fas fa-tv"></i> Upcoming TV Shows</h1>
 
-            <!-- Library heading (now left‑aligned) -->
+            <!-- Library heading -->
             <div class="library-heading">
                 <i class="fas fa-book-open"></i> Your current library overview
             </div>
 
             <!-- First row: library stats -->
             <div class="summary-grid">
-                <!-- Card 1: Shows & downloaded -->
                 <div class="summary-card">
                     <p>
                         You have <strong>{{ library_stats.total_series|default(0) }}</strong> shows,
                         which have <strong>{{ library_stats.total_downloaded_all|default(0) }}</strong> episodes downloaded.
                     </p>
                 </div>
-                <!-- Card 2: Missing monitored -->
                 <div class="summary-card">
                     {% if library_stats.missing_monitored == 0 %}
                         <p>There are currently no missing monitored episodes.</p>
@@ -1117,7 +1112,6 @@
                         </p>
                     {% endif %}
                 </div>
-                <!-- Card 3: Continuing vs Ended vs Upcoming (updated wording) -->
                 <div class="summary-card">
                     <p>
                         Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
@@ -1125,7 +1119,6 @@
                         <strong>{{ library_stats.ended_series|default(0) }}</strong> have ended.
                     </p>
                 </div>
-                <!-- Card 4: Future episodes (updated wording) -->
                 <div class="summary-card">
                     <p>
                         Sonarr has <strong>{{ library_stats.future_episodes|default(0) }}</strong> future episodes scheduled.
@@ -1133,21 +1126,19 @@
                 </div>
             </div>
 
-            <!-- Date range (between the two rows) -->
+            <!-- Date range -->
             <div class="date-range">
                 <i class="fas fa-calendar-alt"></i> Date Range: {{ date_range.start|format_date }} to {{ date_range.end|format_date }}
                 ({{ date_range.total_days }} days total)
             </div>
 
-            <!-- Second row: range stats (only two cards, updated wording) -->
+            <!-- Second row: range stats -->
             <div class="summary-grid" style="margin-top: 10px;">
-                <!-- Card 1: shows with episodes in range -->
                 <div class="summary-card">
                     <p>
                         There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in specified date range.
                     </p>
                 </div>
-                <!-- Card 2: episodes in range with downloaded count -->
                 <div class="summary-card">
                     <p>
                         There are <strong>{{ range_stats.episodes_in_range }}</strong> episodes in specified date range with
@@ -1203,7 +1194,6 @@
                     {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
                     {{ library_stats.total_series }} series
                 </div>
-                <!-- Footnote moved here -->
                 <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px;">
                     * Overall progress includes all episodes, whether monitored or not.
                 </div>
@@ -1224,31 +1214,29 @@
             </div>
         </div>
 
-        <!-- Unified Filter Bar (with integrated legend) -->
+        <!-- Unified Filter Bar -->
         <div class="filter-bar">
             <div class="filter-row">
-                <!-- Search by title -->
                 <div class="filter-group">
                     <i class="fas fa-search"></i>
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                <!-- Progress filter dropdown -->
+                <!-- Progress filter dropdown (UPDATED: season progress) -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
                         <option value="all" selected>All Shows ({{ range_stats.total_series }} in range)</option>
-                        <option value="complete">Season Complete ({{ range_stats.shows_complete }})</option>
-                        <option value="high">Overall Progress 75‑99% ({{ range_stats.shows_high_progress }})</option>
-                        <option value="medium">Overall Progress 25‑74% ({{ range_stats.shows_medium_progress }})</option>
-                        <option value="low">Overall Progress <25% ({{ range_stats.shows_low_progress + range_stats.shows_not_started }})</option>
+                        <option value="complete">Season Complete (100%)</option>
+                        <option value="season-high">High Season Progress (75‑99%)</option>
+                        <option value="season-medium">Medium Season Progress (25‑74%)</option>
+                        <option value="season-low">Low Season Progress (<25%)</option>
                         <option value="date-high">Date Range Progress ≥75%</option>
                         <option value="date-low">Date Range Progress <25% (including 0%)</option>
                         <option value="has-episodes">Has Episodes in Range ({{ range_stats.shows_with_episodes }})</option>
                     </select>
                 </div>
 
-                <!-- Jump to show dropdown -->
                 <div class="filter-group">
                     <i class="fas fa-film"></i>
                     <select id="jumpToShow" class="show-filter" onchange="window.location.href=this.value">
@@ -1259,13 +1247,12 @@
                     </select>
                 </div>
 
-                <!-- Clear Filters button -->
                 <button id="clearFilters" class="clear-btn">
                     <i class="fas fa-times"></i> Clear Filters
                 </button>
             </div>
 
-            <!-- Legend container inside filter bar as footer -->
+            <!-- Legend container -->
             <div class="legend-container">
                 <div class="legend-item" title="All episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-complete);"></div>
@@ -1301,6 +1288,7 @@
                     <a href="{{ config.sonarr_url }}/series/{{ show.title|slugify }}" target="_blank" class="show-card-link">
                         <div class="show-card" 
                              data-progress="{{ show.progress_percentage }}" 
+                             data-season-progress="{{ show.current_season_progress }}"
                              data-date-range-progress="{{ show.date_range_percentage }}"
                              data-has-episodes="{{ 'true' if show.date_range_episodes > 0 else 'false' }}"
                              data-season-complete="{{ 'true' if show.current_season_complete else 'false' }}">
@@ -1318,7 +1306,6 @@
                                 </div>
                                 {% endif %}
                                 <div class="show-badge" title="Current Season">S{{ "%02d"|format(show.current_season) }}</div>
-                                <!-- Dot color now uses date_range_color -->
                                 <div class="status-overall" style="background: {{ show.date_range_color }}; width: 27px; height: 27px;" 
                                      title="Date Range Progress: {{ "%.1f"|format(show.date_range_percentage) }}%"></div>
                             </div>
@@ -1336,7 +1323,6 @@
                                     {{ ' • ⭐ ' + "%.1f"|format(show.rating) if show.rating > 0 else '' }}
                                 </div>
 
-                                <!-- Genres moved above episodes, now closer to meta -->
                                 {% if show.genres %}
                                 <div class="genres">
                                     {% for genre in show.genres[:3] %}
@@ -1348,7 +1334,7 @@
                                 <div class="episodes-section">
                                     <div class="section-title">Episodes in Date Range</div>
                                     <div class="episodes-list" id="episodes-list-{{ show.series_id }}">
-                                        {# Preview episodes (first DISPLAY_EPISODES_LIMIT) #}
+                                        {# Preview episodes #}
                                         {% for ep in show.episodes_in_range[:DISPLAY_EPISODES_LIMIT] %}
                                             {% set status_class = get_episode_status_class(ep) %}
                                             {% set badge = get_episode_badge(ep, show.season_episode_counts) %}
@@ -1388,13 +1374,11 @@
                                             {% endif %}
                                         {% endfor %}
 
-                                        {# If there are more episodes, add expand button #}
+                                        {# Expand button and hidden episodes #}
                                         {% if show.episodes_in_range|length > DISPLAY_EPISODES_LIMIT %}
                                         <button class="expand-episodes-btn" data-show-id="{{ show.series_id }}" data-show-index="{{ loop.index0 }}">
                                             <i class="fas fa-chevron-down"></i> Show More Episodes
                                         </button>
-
-                                        {# Hidden container for additional episodes #}
                                         <div class="all-episodes-container" id="all-episodes-{{ show.series_id }}" style="display: none;">
                                             {% for ep in show.episodes_in_range[DISPLAY_EPISODES_LIMIT:] %}
                                                 {% set status_class = get_episode_status_class(ep) %}
@@ -1437,7 +1421,7 @@
                                         </div>
                                         {% endif %}
 
-                                        {# Padding items for uniform height #}
+                                        {# Padding items #}
                                         {% set preview_count = show.episodes_in_range[:DISPLAY_EPISODES_LIMIT]|length %}
                                         {% if preview_count < DISPLAY_EPISODES_LIMIT %}
                                             {% for i in range(DISPLAY_EPISODES_LIMIT - preview_count) %}
@@ -1489,7 +1473,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Current Season Progress -->
                                     <div class="progress-item">
                                         <div class="progress-header">
                                             <span>Current Season (S{{ show.current_season }})</span>
@@ -1615,6 +1598,37 @@
             }
         }
 
+        // Update filter dropdown counts based on visible cards
+        function updateFilterCounts() {
+            const cards = Array.from(document.querySelectorAll('.show-card'));
+            const total = cards.length;
+
+            let complete = 0, high = 0, medium = 0, low = 0;
+            cards.forEach(card => {
+                const seasonProgress = parseFloat(card.dataset.seasonProgress);
+                const seasonComplete = card.dataset.seasonComplete === 'true';
+                if (seasonComplete) {
+                    complete++;
+                } else if (seasonProgress >= 75) {
+                    high++;
+                } else if (seasonProgress >= 25) {
+                    medium++;
+                } else {
+                    low++;
+                }
+            });
+
+            const select = document.getElementById('progressFilter');
+            if (select) {
+                select.options[0].text = `All Shows (${total} in range)`;
+                select.options[1].text = `Season Complete (100%) (${complete})`;
+                select.options[2].text = `High Season Progress (75‑99%) (${high})`;
+                select.options[3].text = `Medium Season Progress (25‑74%) (${medium})`;
+                select.options[4].text = `Low Season Progress (<25%) (${low})`;
+                // options 5,6,7 (date-high, date-low, has-episodes) keep original static counts
+            }
+        }
+
         // Combined filter function (search + progress)
         function applyFilters() {
             const searchTerm = document.getElementById('titleSearch').value.toLowerCase();
@@ -1624,14 +1638,12 @@
                 const card = wrapper.querySelector('.show-card');
                 if (!card) return;
 
-                // Search filter
                 const title = wrapper.querySelector('.show-title')?.textContent.toLowerCase() || '';
                 const matchesSearch = title.includes(searchTerm);
 
-                // Progress filter
                 let matchesProgress = true;
                 if (progressFilter !== 'all') {
-                    const progress = parseFloat(card.dataset.progress);
+                    const seasonProgress = parseFloat(card.dataset.seasonProgress);
                     const dateRangeProgress = parseFloat(card.dataset.dateRangeProgress);
                     const hasEpisodes = card.dataset.hasEpisodes === 'true';
                     const seasonComplete = card.dataset.seasonComplete === 'true';
@@ -1640,20 +1652,20 @@
                         case 'complete':
                             matchesProgress = seasonComplete;
                             break;
-                        case 'high':
-                            matchesProgress = progress >= 75 && progress < 100;
+                        case 'season-high':
+                            matchesProgress = seasonProgress >= 75 && seasonProgress < 100 && !seasonComplete;
                             break;
-                        case 'medium':
-                            matchesProgress = progress >= 25 && progress < 75;
+                        case 'season-medium':
+                            matchesProgress = seasonProgress >= 25 && seasonProgress < 75;
                             break;
-                        case 'low':
-                            matchesProgress = progress < 25;  // includes 0%
+                        case 'season-low':
+                            matchesProgress = seasonProgress < 25;
                             break;
                         case 'date-high':
                             matchesProgress = dateRangeProgress >= 75;
                             break;
                         case 'date-low':
-                            matchesProgress = dateRangeProgress < 25;  // includes 0%
+                            matchesProgress = dateRangeProgress < 25;
                             break;
                         case 'has-episodes':
                             matchesProgress = hasEpisodes;
@@ -1665,13 +1677,15 @@
 
                 wrapper.style.display = (matchesSearch && matchesProgress) ? 'block' : 'none';
             });
+
+            // After filtering, update the dropdown counts
+            updateFilterCounts();
         }
 
         // Attach event listeners
         document.getElementById('titleSearch').addEventListener('input', applyFilters);
         document.getElementById('progressFilter').addEventListener('change', applyFilters);
 
-        // Clear filters
         document.getElementById('clearFilters').addEventListener('click', function() {
             document.getElementById('titleSearch').value = '';
             document.getElementById('progressFilter').value = 'all';
@@ -1696,6 +1710,8 @@
 
             setupExpandButtons();
             setupMouseLeaveHandlers();
+            // Initial count update
+            updateFilterCounts();
         });
     </script>
 </body>
