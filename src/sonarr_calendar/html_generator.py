@@ -1,7 +1,7 @@
 # src/sonarr_calendar/html_generator.py
 import jinja2
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
 import base64
 import logging
@@ -14,7 +14,7 @@ from sonarr_calendar.utils import (
     format_date_for_display,
     slugify,
     get_episode_badge,
-    get_episode_status_class,   # <-- THIS MUST BE PRESENT
+    get_episode_status_class,
     get_days_class,
     get_days_text
 )
@@ -53,14 +53,19 @@ class HTMLGenerator:
         # Register global functions/variables
         self.env.globals['get_progress_bar_color'] = get_progress_bar_color
         self.env.globals['get_episode_badge'] = get_episode_badge
-        self.env.globals['get_episode_status_class'] = get_episode_status_class   # <-- THIS LINE
+        self.env.globals['get_episode_status_class'] = get_episode_status_class
         self.env.globals['get_days_class'] = get_days_class
         self.env.globals['get_days_text'] = get_days_text
         self.env.globals['timedelta'] = timedelta
         self.env.globals['now'] = lambda: datetime.now(timezone.utc)
 
     def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange,
-                 sonarr_client, library_stats: Dict[str, Any], range_stats: Dict[str, Any]) -> str:
+                 sonarr_client, library_stats: Dict[str, Any], range_stats: Dict[str, Any],
+                 error_message: Optional[str] = None) -> str:
+        """
+        Generate the HTML calendar.
+        If error_message is provided, it will be displayed prominently.
+        """
         # DEBUG lines are commented out for normal operation
         # logger.info("\n=== DEBUG in html_generator.generate ===")
         # logger.info(f"shows list has {len(shows)} items")
@@ -71,9 +76,14 @@ class HTMLGenerator:
 
         from sonarr_calendar.models import calculate_completed_seasons_in_range
 
-        completed_seasons = calculate_completed_seasons_in_range(
-            shows, episodes, date_range.start, date_range.end, sonarr_client
-        )
+        completed_seasons = []
+        if sonarr_client and shows and episodes:
+            try:
+                completed_seasons = calculate_completed_seasons_in_range(
+                    shows, episodes, date_range.start, date_range.end, sonarr_client
+                )
+            except Exception as e:
+                logger.error(f"Failed to calculate completed seasons: {e}")
         # logger.info(f"DEBUG: completed_seasons returned {len(completed_seasons)} items")
 
         template = self.env.get_template('calendar.html.j2')
@@ -87,6 +97,7 @@ class HTMLGenerator:
             library_stats=library_stats,
             range_stats=range_stats,
             completed_seasons=completed_seasons,
+            error_message=error_message,
             DISPLAY_EPISODES_LIMIT=2,
             EPISODE_ITEM_HEIGHT=80,
             EXPAND_BUTTON_HEIGHT=42
