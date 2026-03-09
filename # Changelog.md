@@ -9,6 +9,25 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ## [3.4.0] - 2026-03-06
 
+### Added
+
+- **Current Season Progress Bar** – Each show card now displays a third progress bar for the current season, using the existing `current_season_progress` data. This provides a quick visual indicator of how far along the active season is, complementing the overall and date‑range progress bars.
+- **Progress Bar Colour Consistency** – The new bar uses the same `get_progress_bar_color` function as the other bars, ensuring colour‑coding matches the legend (green for 100%, red for 0%, etc.).
+
+### Changed
+
+- **Card Layout** – Added a new `.progress-item` block for current season, slightly increasing card height but improving at‑a‑glance information density.
+
+### Changed
+
+- **Card Layout** – Moved the genres block above the "Episodes in Date Range" section. This groups all show metadata (title, year, network, runtime, rating, genres) together, making the card layout more logical and improving readability.
+
+### Changed
+
+- **Library Heading Alignment** – Now left‑aligned to match the date range, improving visual consistency.
+- **Card Metadata Spacing** – Reduced padding between show meta and genres, creating a tighter, more compact card layout.
+- **Header Text** – Updated wording for summary cards to be more natural and descriptive (as per user request).
+
 ### Fixed
 
 - **Import Error** – Added missing `get_episode_status_class` to the import list in `html_generator.py` and ensured the function is defined in `utils.py`.
@@ -278,5 +297,6 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - NameError in connection test (moved requests import inside class).
 
 _Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
+
 
 
