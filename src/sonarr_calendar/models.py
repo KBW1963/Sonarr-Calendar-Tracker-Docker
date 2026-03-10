@@ -293,63 +293,18 @@ def process_calendar_data(
             logger.warning(f"Series {series_id} not found, skipping")
             continue
 
-        # Group episodes by date, creating multi‑episode objects when needed
-        grouped_episodes = []
+        # Instead of grouping by date, treat each episode individually
+        all_episodes = []
         total_individual_episodes = 0
 
-        # Process dates in order (optional)
         for air_date, ep_list in sorted(date_dict.items()):
             ep_list.sort(key=lambda x: (x.season_number, x.episode_number))
-            if len(ep_list) == 1:
-                grouped_episodes.append(ep_list[0])
+            for ep in ep_list:
+                all_episodes.append(ep)
                 total_individual_episodes += 1
-            else:
-                # Multiple episodes on same date – create a grouped episode object
-                titles = [ep.title for ep in ep_list]
-                truncated_titles = [truncate_text(ep.title, MAX_EPISODE_TITLE_LENGTH) for ep in ep_list]
-                seasons = list(set(ep.season_number for ep in ep_list))
-                episodes_nums = [ep.episode_number for ep in ep_list]
 
-                episodes_info = {
-                    'titles': titles,
-                    'truncated_titles': truncated_titles,
-                    'seasons': seasons,
-                    'episodes': episodes_nums,
-                    'episode_count': len(ep_list)
-                }
-
-                formatted = format_multi_episode_display(episodes_info)
-
-                # Determine combined status: has_file if all have file, monitored if any monitored
-                all_have_file = all(ep.has_file for ep in ep_list)
-                any_monitored = any(ep.monitored for ep in ep_list)
-                badge_type = ep_list[0].episode_type if ep_list else None
-
-                first_ep = ep_list[0]
-                grouped_ep = Episode(
-                    series_id=first_ep.series_id,
-                    season_number=seasons[0] if seasons else 0,
-                    episode_number=episodes_nums[0],  # not used for display
-                    title=first_ep.title,  # not used for display
-                    air_date=air_date,
-                    has_file=all_have_file,
-                    monitored=any_monitored,
-                    overview="",  # no overview for group
-                    episode_type=badge_type,
-                    single_episode=False,
-                    formatted_season_episode=formatted['formatted_number'],
-                    titles_display=formatted['titles_display'],
-                    full_tooltip=formatted['full_tooltip'],
-                    individual_episode_count=len(ep_list),
-                    days_until=first_ep.days_until,
-                    full_title=first_ep.full_title
-                )
-                grouped_episodes.append(grouped_ep)
-                total_individual_episodes += len(ep_list)
-
-        # Now we have grouped_episodes list for this series
         # Filter those within the date range (they already are, but ensure)
-        in_range = [ep for ep in grouped_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
+        in_range = [ep for ep in all_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
 
         # Calculate progress for the series
         poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
@@ -361,11 +316,8 @@ def process_calendar_data(
          cur_eps, cur_down,
          cur_cur) = calculate_progress(series)
 
-        # Count downloaded episodes in range (respecting multi‑episode counts)
-        range_downloaded = 0
-        for ep in in_range:
-            if ep.has_file:
-                range_downloaded += ep.individual_episode_count
+        # Count downloaded episodes in range
+        range_downloaded = sum(1 for ep in in_range if ep.has_file)
 
         range_percent = (range_downloaded / total_individual_episodes * 100) if total_individual_episodes > 0 else 0
         range_color = get_progress_bar_color(range_percent)
