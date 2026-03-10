@@ -7,7 +7,36 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.4.1] - 2026-03-10
+
+### Fixed
+
+- **Legend Filtering** – The legend items for "Started (25‑49%)", "Just Started (1‑24%)", and "Not Started (0%)" now correctly apply distinct filters instead of all using the same "Low Season Progress" filter. Each now maps to its own range, and dropdown counts are updated accordingly.
+- **Filter Logic** – Updated the `applyFilters` switch to handle the new filter values, ensuring accurate filtering based on current season progress.
+
+### Added
+
+- **Legend Clarification** – Added a small header above the legend: "Downloaded episodes" with a download icon, making it clear that the progress colors refer to downloaded episode counts.
+
+### Changed
+
+- **Filter Dropdown Options** – Split the generic "Low Season Progress (<25%)" into three separate options: "Started (25‑49%)", "Just Started (1‑24%)", and "Not Started (0%)" for finer-grained filtering.
+
+### Notes
+
+- All previous enhancements (sorting, error handling, mobile responsiveness, visual polish) remain intact.
+
 ## [3.4.0] - 2026-03-06
+
+### Added
+
+- **Sorting** – A new dropdown in the filter bar allows sorting shows by:
+  - Title (A-Z)
+  - Overall Progress (High to Low / Low to High)
+  - Current Season Progress (High to Low / Low to High)
+  - Next Episode Date (Earliest first)
+    The sort order is maintained even after filtering.
+- **Next Episode Timestamp** – Added `next_episode_timestamp` to `ProcessedShow` for sorting by the earliest episode in the date range (or a large value if none).
 
 ### Added
 
