@@ -1318,15 +1318,17 @@
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                <!-- Progress filter dropdown (season progress) -->
+                                <!-- Progress filter dropdown (season progress) -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
                         <option value="all" selected>All Shows ({{ range_stats.total_series }} in range)</option>
                         <option value="complete">Season Complete (100%)</option>
                         <option value="season-high">High Season Progress (75‑99%)</option>
-                        <option value="season-medium">Medium Season Progress (25‑74%)</option>
-                        <option value="season-low">Low Season Progress (<25%)</option>
+                        <option value="season-medium">Medium Season Progress (50‑74%)</option>
+                        <option value="season-25-49">Started (25‑49%)</option>
+                        <option value="season-1-24">Just Started (1‑24%)</option>
+                        <option value="season-0">Not Started (0%)</option>
                         <option value="date-high">Date Range Progress ≥75%</option>
                         <option value="date-low">Date Range Progress <25% (including 0%)</option>
                         <option value="has-episodes">Has Episodes in Range ({{ range_stats.shows_with_episodes }})</option>
@@ -1360,9 +1362,9 @@
                     <i class="fas fa-times"></i> Clear Filters
                 </button>
             </div>
-
-            <!-- Legend container (clickable items) -->
+        <!-- Legend container (clickable items) -->
             <div class="legend-container">
+                
                 <div class="legend-item" data-filter="complete" title="All episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-complete);"></div>
                     <span>Complete (100%)</span>
@@ -1375,17 +1377,20 @@
                     <div class="legend-bar" style="background: var(--progress-halfway);"></div>
                     <span>Halfway (50‑74%)</span>
                 </div>
-                <div class="legend-item" data-filter="season-low" title="25‑49% downloaded">
+                <div class="legend-item" data-filter="season-25-49" title="25‑49% downloaded">
                     <div class="legend-bar" style="background: var(--progress-started);"></div>
                     <span>Started (25‑49%)</span>
                 </div>
-                <div class="legend-item" data-filter="season-low" title="1‑24% downloaded">
+                <div class="legend-item" data-filter="season-1-24" title="1‑24% downloaded">
                     <div class="legend-bar" style="background: var(--progress-just-started);"></div>
                     <span>Just Started (1‑24%)</span>
                 </div>
-                <div class="legend-item" data-filter="season-low" title="No episodes downloaded">
+                <div class="legend-item" data-filter="season-0" title="No episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-not-started);"></div>
                     <span>Not Started (0%)</span>
+                </div>
+                <div style="width: 100%; text-align: center; margin-bottom: 5px; font-size: 0.85em; color: var(--text-secondary);">
+                    <i class="fas fa-download"></i>  % of episodes downloaded for current season
                 </div>
             </div>
         </div>
@@ -1717,7 +1722,7 @@
             const cards = Array.from(document.querySelectorAll('.show-card'));
             const total = cards.length;
 
-            let complete = 0, high = 0, medium = 0, low = 0;
+            let complete = 0, high = 0, medium = 0, started = 0, justStarted = 0, notStarted = 0;
             cards.forEach(card => {
                 const seasonProgress = parseFloat(card.dataset.seasonProgress);
                 const seasonComplete = card.dataset.seasonComplete === 'true';
@@ -1725,10 +1730,14 @@
                     complete++;
                 } else if (seasonProgress >= 75) {
                     high++;
-                } else if (seasonProgress >= 25) {
+                } else if (seasonProgress >= 50) {
                     medium++;
+                } else if (seasonProgress >= 25) {
+                    started++;
+                } else if (seasonProgress > 0) {
+                    justStarted++;
                 } else {
-                    low++;
+                    notStarted++;
                 }
             });
 
@@ -1737,9 +1746,11 @@
                 select.options[0].text = `All Shows (${total} in range)`;
                 select.options[1].text = `Season Complete (100%) (${complete})`;
                 select.options[2].text = `High Season Progress (75‑99%) (${high})`;
-                select.options[3].text = `Medium Season Progress (25‑74%) (${medium})`;
-                select.options[4].text = `Low Season Progress (<25%) (${low})`;
-                // options 5,6,7 (date-high, date-low, has-episodes) keep original static counts
+                select.options[3].text = `Medium Season Progress (50‑74%) (${medium})`;
+                select.options[4].text = `Started (25‑49%) (${started})`;
+                select.options[5].text = `Just Started (1‑24%) (${justStarted})`;
+                select.options[6].text = `Not Started (0%) (${notStarted})`;
+                // options 7,8,9 (date-high, date-low, has-episodes) keep original static counts
             }
         }
 
@@ -1807,10 +1818,16 @@
                             matchesProgress = seasonProgress >= 75 && seasonProgress < 100 && !seasonComplete;
                             break;
                         case 'season-medium':
-                            matchesProgress = seasonProgress >= 25 && seasonProgress < 75;
+                            matchesProgress = seasonProgress >= 50 && seasonProgress < 75;
                             break;
-                        case 'season-low':
-                            matchesProgress = seasonProgress < 25;
+                        case 'season-25-49':
+                            matchesProgress = seasonProgress >= 25 && seasonProgress < 50;
+                            break;
+                        case 'season-1-24':
+                            matchesProgress = seasonProgress >= 1 && seasonProgress < 25;
+                            break;
+                        case 'season-0':
+                            matchesProgress = seasonProgress == 0;
                             break;
                         case 'date-high':
                             matchesProgress = dateRangeProgress >= 75;
