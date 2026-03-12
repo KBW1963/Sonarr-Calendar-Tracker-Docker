@@ -307,8 +307,9 @@ def process_calendar_data(
         in_range = [ep for ep in all_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
 
         # Calculate progress for the series
-        poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
-        poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
+        # MODIFIED: Use config.image_base_url for image URLs instead of config.sonarr_url
+        poster_url = get_poster_url(series, config.image_quality, config.image_base_url)
+        poster_url_poster = get_poster_url(series, 'poster', config.image_base_url)
 
         (overall, color,
          monitored, unmonitored, _,
