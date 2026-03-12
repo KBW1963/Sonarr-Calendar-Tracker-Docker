@@ -7,6 +7,27 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.5.1] - 2026-03-12
+
+### Added
+
+- New environment variable `IMAGE_BASE_URL` (default empty) to allow relative image paths.
+- Support for serving images directly from a mounted MediaCover folder via relative URLs (e.g., `/MediaCover/...`).
+
+### Changed
+
+- `config.py`: Added `image_base_url` field to `Config` dataclass (optional, default `""`). Reordered fields to satisfy Python dataclass requirements (all required fields first, optional fields after).
+- `models.py`: Modified `process_calendar_data` to use `config.image_base_url` (instead of `config.sonarr_url`) when calling `get_poster_url`. This ensures image URLs in the generated HTML are relative when `IMAGE_BASE_URL` is empty.
+
+### Fixed
+
+- Resolved `TypeError` caused by a required field (`days_past`) appearing after a default field in the `Config` dataclass.
+
+### Notes
+
+- The `IMAGE_CACHE_DIR` and `ENABLE_IMAGE_CACHE` variables are now redundant if you are serving images via the MediaCover mount. Consider setting `ENABLE_IMAGE_CACHE=false` to disable unnecessary downloads.
+- No changes were required in `image_cache.py` or `cli.py` – they already handle the new `base_url` parameter correctly.
+
 ## [3.5.0] - 2026-03-10
 
 ### Changed
