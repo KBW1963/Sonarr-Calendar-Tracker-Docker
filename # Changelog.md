@@ -7,7 +7,37 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.6.0] - 2026-03-15
+
+### Added
+
+- **Dual Image Caching** – Both fanart (for main cards) and poster (for completed seasons) are now cached and served locally. This eliminates all Sonarr authentication prompts for external users.
+- **Separate Cached URL Dictionaries** – `cached_fanart_urls` and `cached_poster_urls` are built in `cli.py` and passed to the template, allowing precise image type selection.
+- **Completed Seasons Poster Fix** – The completed seasons section now uses poster images (portrait) again, as originally intended, served from the local cache.
+
+### Changed
+
+- **Image Cache Logic** – `download_all_posters` now downloads both fanart and poster images for each series. `get_cached_image_url` accepts an `image_type` parameter to retrieve the appropriate URL.
+- **Template Updates** – Main card header uses `cached_fanart_urls`; completed seasons section uses `cached_poster_urls`. No fallback to Sonarr URLs remains, ensuring zero authentication prompts.
+
+### Fixed
+
+- **Sonarr Authentication Loop** – External users no longer see login prompts because all image requests are now served from the local nginx cache.
+
 ## [3.5.1] - 2026-03-12
+
+### Performance
+
+- **`cli.py`** – Consolidated multiple loops over `all_series` into a single loop when logging series status, reducing redundant passes and improving startup speed for large libraries.
+- **`models.py`** - `calculate_progress`\*\* – Now iterates through seasons only once, reducing overhead.
+- **`utils.py`**`calculate_overall_statistics`\*\* – Replaced multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
+
+- **`process_calendar_data`** – Simplified episode collection by removing unnecessary date grouping; episodes are now appended directly to a list and sorted once, improving efficiency for large calendars.
+
+### Changed
+
+- **Internal logic only** – No user‑visible changes; all optimisations are purely for speed and maintainability.
+- **Date Format Caching** – `format_date_for_display` now uses a cached system date format string, computed once at module load. This eliminates repeated locale lookups and date parsing, significantly speeding up template rendering, especially on pages with many dates.
 
 ### Added
 
