@@ -94,37 +94,77 @@ CMD []
 4. Create docker-compose.yml
 
 ```yaml
+# docker-compose.yml
+# Sonarr Calendar Tracker – Docker Compose configuration
+# This file sets up the tracker container. All required environment variables must be provided.
+# Optional variables have sensible defaults; uncomment and modify them as needed.
+
 services:
-  sonarr-calendar:
-    build: .
-    container_name: sonarr_calendar
+  sonarr-monitor:
+    image: tomita2022/sonarr-calendar:latest
+    container_name: sonarr-monitor
     restart: unless-stopped
     environment:
-      # Required
-      - SONARR_URL=http://192.168.0.100:8989              # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
-      - SONARR_API_KEY=Your_Secret_API_key                # API key from Sonarr (Settings > General > Security)
+      # ---------- REQUIRED ----------
+      # Internal URL of your Sonarr instance (used for API calls and image downloads).
+      # This must be reachable from within the Docker network.
+      # Example: http://192.168.1.100:8989 or http://sonarr:8989 if Sonarr is also in Docker.
+      - SONARR_URL=<your_sonarr_url>
+
+      # Sonarr API key – obtain from Sonarr Settings → General.
+      - SONARR_API_KEY=<your_api_key>
+
+      # Number of days in the past to include in the calendar.
       - DAYS_PAST=7
+
+      # Number of days in the future to include in the calendar.
       - DAYS_FUTURE=30
-      - OUTPUT_HTML_FILE=/output/TV.html                  # output HTML file path (must be in a mounted volume)
-      # Optional (with defaults shown)
-      # - OUTPUT_JSON_FILE=/output/sonarr_data.json       # optional – remove if not wanted
-      - IMAGE_CACHE_DIR=/cache                            # default: sonarr_images
-      - REFRESH_INTERVAL_HOURS=6                          # default: 6
-      - HTML_THEME=dark                                   # default: dark
-      - IMAGE_QUALITY=fanart                              # default: fanart
-      - ENABLE_IMAGE_CACHE=true                           # default: true
-      - HTML_TITLE="My Sonarr Dashboard"                  # default: Sonarr Calendar Pro
-      - TZ=Europe/London                                  # for correct log timestamps
+
+      # Path where the generated HTML file will be saved (inside the container).
+      # Must be inside a mounted volume so the file persists.
+      - OUTPUT_HTML_FILE=/output/index.html
+
+      # ---------- OPTIONAL (with defaults) ----------
+      # Public URL of your Sonarr instance (used for user‑facing links in the HTML).
+      # If not set, the internal SONARR_URL will be used for links as well.
+      # - SONARR_PUBLIC_URL=https://sonarr.example.com
+
+      # Directory where images are cached (inside the container).
+      # - IMAGE_CACHE_DIR=/output/sonarr_images
+
+      # Base URL for constructing image download URLs – usually the same as SONARR_URL.
+      # - IMAGE_BASE_URL=<your_sonarr_url>
+
+      # How often to regenerate the calendar (in hours). Default: 6.
+      # - REFRESH_INTERVAL_HOURS=6
+
+      # Theme: dark or light. Default: dark.
+      # - HTML_THEME=dark
+
+      # Preferred image quality for main cards (fanart, poster, etc.). Default: fanart.
+      # - IMAGE_QUALITY=fanart
+
+      # Enable or disable image caching. Default: true.
+      # - ENABLE_IMAGE_CACHE=true
+
+      # Title displayed in the browser tab and page header. Default: My Sonarr Dashboard.
+      # - HTML_TITLE=Upcoming TV Shows
+
+      # Timezone for correct log timestamps (e.g., Europe/London, America/New_York). Default: UTC.
+      # - TZ=Europe/London
+
     volumes:
-      - ./output:/output
-      - ./cache:/cache
+      # Mount a host directory where the HTML file and cached images will be stored.
+      # The directory must be writable by the container (user ID 1000 inside the container).
+      # Replace `/path/on/host` with the actual path on your server.
+      - /path/on/host:/output
+
     networks:
       - sonarr-network
- 
 
+# Define a custom network (optional). You can also use the default bridge network.
 networks:
   sonarr-network:
-
     driver: bridge
 ```
 ---
