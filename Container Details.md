@@ -168,6 +168,20 @@ networks:
     driver: bridge
 ```
 ---
+## Important Notes
+- Permissions: The container runs as a non‑root user with UID 1000. Ensure the mounted host directory (`/path/on/host)` is owned by UID 1000 or is world‑writable (e.g., chmod 777). Better: chown 1000:1000 `/path/on/host`.
+
+- Sonarr URL: Use the internal URL that is accessible from within the Docker network. If Sonarr is on the same host, use `http://host.docker.internal:8989` (on Docker Desktop) or the host's internal IP (e.g., `http://192.168.1.100:8989`). If Sonarr is another container, use its service name and port (e.g., `http://sonarr:8989`).
+
+- API Key: Keep this secret; never commit it to a public repository.
+
+- Image Cache: The `IMAGE_CACHE_DIR` is set to `/output/sonarr_images` by default. This directory will be created automatically inside the mounted volume.
+
+- Public URL: If you have a reverse proxy (like Pangolin, Nginx, or Traefik) providing public access to Sonarr, set `SONARR_PUBLIC_URL` to the public domain (e.g., `https://sonarr.example.com`). This ensures that links in the calendar point to your public Sonarr instance, prompting login as expected. If not set, the internal `SONARR_URL` will be used for links, which may not be accessible from outside your network.
+
+This configuration provides a solid starting point. Adjust paths and variables to match your setup.
+
+---
 5. Building and Running the Container
 
 Build the image
