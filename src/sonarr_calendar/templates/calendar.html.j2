@@ -386,7 +386,7 @@
         }
         .completed-season-info {
             flex-grow: 1;
-            min-width: 0; /* allow text truncation */
+            min-width: 0;
         }
         .completed-season-title {
             font-weight: 600;
@@ -1194,30 +1194,30 @@
             <div class="summary-grid">
                 <div class="summary-card">
                     <p>
-                        You have <strong>{{ library_stats.total_series|default(0) }}</strong> shows,
-                        which have <strong>{{ library_stats.total_downloaded_all|default(0) }}</strong> episodes downloaded.
+                        You have <strong>{{ library_stats.get('total_series', 0) }}</strong> shows,
+                        which have <strong>{{ library_stats.get('total_downloaded_all', 0) }}</strong> episodes downloaded.
                     </p>
                 </div>
                 <div class="summary-card">
-                    {% if library_stats.missing_monitored == 0 %}
+                    {% if library_stats.get('missing_monitored', 0) == 0 %}
                         <p>There are currently no missing monitored episodes.</p>
                     {% else %}
                         <p>
-                            You have <strong>{{ library_stats.missing_monitored }}</strong> missing episodes
+                            You have <strong>{{ library_stats.get('missing_monitored', 0) }}</strong> missing episodes
                             for shows that are monitored.
                         </p>
                     {% endif %}
                 </div>
                 <div class="summary-card">
                     <p>
-                        Out of <strong>{{ library_stats.total_series|default(0) }}</strong> shows in your library,
-                        there are <strong>{{ library_stats.continuing_series|default(0) }}</strong> continuing (including <strong>{{ library_stats.upcoming_series|default(0) }}</strong> upcoming), and 
-                        <strong>{{ library_stats.ended_series|default(0) }}</strong> have ended.
+                        Out of <strong>{{ library_stats.get('total_series', 0) }}</strong> shows in your library,
+                        there are <strong>{{ library_stats.get('continuing_series', 0) }}</strong> continuing (including <strong>{{ library_stats.get('upcoming_series', 0) }}</strong> upcoming), and 
+                        <strong>{{ library_stats.get('ended_series', 0) }}</strong> have ended.
                     </p>
                 </div>
                 <div class="summary-card">
                     <p>
-                        Sonarr has <strong>{{ library_stats.future_episodes|default(0) }}</strong> future episodes scheduled.
+                        Sonarr has <strong>{{ library_stats.get('future_episodes', 0) }}</strong> future episodes scheduled.
                     </p>
                 </div>
             </div>
@@ -1232,13 +1232,13 @@
             <div class="summary-grid" style="margin-top: 10px;">
                 <div class="summary-card">
                     <p>
-                        There are <strong>{{ range_stats.shows_with_episodes }}</strong> shows with episodes in specified date range.
+                        There are <strong>{{ range_stats.get('shows_with_episodes', 0) }}</strong> shows with episodes in specified date range.
                     </p>
                 </div>
                 <div class="summary-card">
                     <p>
-                        There are <strong>{{ range_stats.episodes_in_range }}</strong> episodes in specified date range with
-                        <strong>{{ range_stats.downloaded_in_range }}</strong> episodes already downloaded.
+                        There are <strong>{{ range_stats.get('episodes_in_range', 0) }}</strong> episodes in specified date range with
+                        <strong>{{ range_stats.get('downloaded_in_range', 0) }}</strong> episodes already downloaded.
                     </p>
                 </div>
             </div>
@@ -1252,13 +1252,22 @@
             <div class="completed-seasons-grid">
                 {% if completed_seasons %}
                     {% for cs in completed_seasons %}
-                    <a href="{{ config.sonarr_url }}/series/{{ cs.title|slugify }}" target="_blank" class="completed-season-link">
+                    
+                    <a href="
+                        {%- if config.sonarr_public_url -%}
+                            {{ config.sonarr_public_url }}/series/{{ cs.title|slugify }}
+                        {%- else -%}
+                            {{ config.sonarr_url }}/series/{{ cs.title|slugify }}
+                        {%- endif -%}
+                    " target="_blank" class="completed-season-link">
                         <div class="completed-season-item">
                             <div class="completed-season-poster">
-                                {% if cs.poster_url %}
-                                <img src="{{ cs.poster_url }}" alt="{{ cs.title }}" loading="lazy" class="completed-season-img">
+                                {% if cached_poster_urls and cached_poster_urls.get(cs.series_id) %}
+                                    <img src="{{ cached_poster_urls[cs.series_id] }}" alt="{{ cs.title }}" loading="lazy" class="completed-season-img">
+                                {% elif cached_fanart_urls and cached_fanart_urls.get(cs.series_id) %}
+                                    <img src="{{ cached_fanart_urls[cs.series_id] }}" alt="{{ cs.title }}" loading="lazy" class="completed-season-img">
                                 {% else %}
-                                <div class="poster-placeholder-small">🎬</div>
+                                    <div class="poster-placeholder-small">🎬</div>
                                 {% endif %}
                             </div>
                             <div class="completed-season-info">
@@ -1280,15 +1289,15 @@
             <div class="stat-progress">
                 <div class="stat-progress-header">
                     <span>Complete Library Progress</span>
-                    <span class="stat-progress-percentage">{{ "%.1f"|format(library_stats.overall_progress) }}%</span>
+                    <span class="stat-progress-percentage">{{ "%.1f"|format(library_stats.get('overall_progress', 0)) }}%</span>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: {{ library_stats.overall_progress }}%; 
-                         background: {{ get_progress_bar_color(library_stats.overall_progress) }};"></div>
+                    <div class="stat-progress-fill" style="width: {{ library_stats.get('overall_progress', 0) }}%; 
+                         background: {{ get_progress_bar_color(library_stats.get('overall_progress', 0)) }};"></div>
                 </div>
                 <div class="stat-progress-stats">
-                    {{ library_stats.total_downloaded_all }}/{{ library_stats.total_episodes_all }} episodes • 
-                    {{ library_stats.total_series }} series
+                    {{ library_stats.get('total_downloaded_all', 0) }}/{{ library_stats.get('total_episodes_all', 0) }} episodes • 
+                    {{ library_stats.get('total_series', 0) }} series
                 </div>
                 <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.9; text-align: center; border-top: 1px solid var(--border-color); padding-top: 10px;">
                     * Overall progress includes all episodes, whether monitored or not.
@@ -1297,15 +1306,15 @@
 
             <div class="stat-progress">
                 <div class="stat-progress-header">
-                    <span><i class="fas fa-calendar-alt" style="margin-right: 5px;"></i> Date Range Progress ({{ date_range.start|format_date }} to {{ date_range.end|format_date }})</span>
-                    <span class="stat-progress-percentage">{{ "%.1f"|format(range_stats.overall_date_range_progress) }}%</span>
+                    <span>Date Range Progress ({{ date_range.start|format_date }} to {{ date_range.end|format_date }})</span>
+                    <span class="stat-progress-percentage">{{ "%.1f"|format(range_stats.get('overall_date_range_progress', 0)) }}%</span>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: {{ range_stats.overall_date_range_progress }}%; 
-                         background: {{ get_progress_bar_color(range_stats.overall_date_range_progress) }};"></div>
+                    <div class="stat-progress-fill" style="width: {{ range_stats.get('overall_date_range_progress', 0) }}%; 
+                         background: {{ get_progress_bar_color(range_stats.get('overall_date_range_progress', 0)) }};"></div>
                 </div>
                 <div class="stat-progress-stats">
-                    {{ range_stats.downloaded_in_range }}/{{ range_stats.episodes_in_range }} episodes in date range
+                    {{ range_stats.get('downloaded_in_range', 0) }}/{{ range_stats.get('episodes_in_range', 0) }} episodes in date range
                 </div>
             </div>
         </div>
@@ -1318,11 +1327,11 @@
                     <input type="text" id="titleSearch" placeholder="Search shows...">
                 </div>
 
-                                <!-- Progress filter dropdown (season progress) -->
+                <!-- Progress filter dropdown (season progress) -->
                 <div class="filter-group">
                     <i class="fas fa-chart-line"></i>
                     <select id="progressFilter">
-                        <option value="all" selected>All Shows ({{ range_stats.total_series }} in range)</option>
+                        <option value="all" selected>All Shows ({{ range_stats.get('total_series', 0) }} in range)</option>
                         <option value="complete">Season Complete (100%)</option>
                         <option value="season-high">High Season Progress (75‑99%)</option>
                         <option value="season-medium">Medium Season Progress (50‑74%)</option>
@@ -1331,7 +1340,7 @@
                         <option value="season-0">Not Started (0%)</option>
                         <option value="date-high">Date Range Progress ≥75%</option>
                         <option value="date-low">Date Range Progress <25% (including 0%)</option>
-                        <option value="has-episodes">Has Episodes in Range ({{ range_stats.shows_with_episodes }})</option>
+                        <option value="has-episodes">Has Episodes in Range ({{ range_stats.get('shows_with_episodes', 0) }})</option>
                     </select>
                 </div>
 
@@ -1362,9 +1371,12 @@
                     <i class="fas fa-times"></i> Clear Filters
                 </button>
             </div>
-        <!-- Legend container (clickable items) -->
+
+            <!-- Legend container (clickable items) with header -->
             <div class="legend-container">
-                
+                <div style="width: 100%; text-align: center; margin-bottom: 10px; font-size: 0.85em; color: var(--text-secondary);">
+                    <i class="fas fa-download"></i> Downloaded episodes
+                </div>
                 <div class="legend-item" data-filter="complete" title="All episodes downloaded">
                     <div class="legend-bar" style="background: var(--progress-complete);"></div>
                     <span>Complete (100%)</span>
@@ -1389,9 +1401,6 @@
                     <div class="legend-bar" style="background: var(--progress-not-started);"></div>
                     <span>Not Started (0%)</span>
                 </div>
-                <div style="width: 100%; text-align: center; margin-bottom: 5px; font-size: 0.85em; color: var(--text-secondary);">
-                    <i class="fas fa-download"></i>  % of episodes downloaded for current season
-                </div>
             </div>
         </div>
 
@@ -1399,7 +1408,13 @@
             {% if shows %}
                 {% for show in shows %}
                 <div id="show-{{ show.series_id }}" class="show-card-wrapper" data-show-id="{{ show.series_id }}">
-                    <a href="{{ config.sonarr_url }}/series/{{ show.title|slugify }}" target="_blank" class="show-card-link">
+                        <a href="
+                        {%- if config.sonarr_public_url -%}
+                            {{ config.sonarr_public_url }}/series/{{ show.title|slugify }}
+                        {%- else -%}
+                            {{ config.sonarr_url }}/series/{{ show.title|slugify }}
+                        {%- endif -%}
+                    " target="_blank" class="show-card-link">
                         <div class="show-card" 
                              data-progress="{{ show.progress_percentage }}" 
                              data-season-progress="{{ show.current_season_progress }}"
@@ -1409,17 +1424,15 @@
                              data-title="{{ show.title|lower }}"
                              data-next-episode="{{ show.next_episode_timestamp }}">
                             <div class="card-header">
-                                {% if show.poster_url %}
-                                <div class="poster-container">
-                                    <img src="{{ show.poster_url }}" alt="{{ show.title }}" class="card-poster" loading="lazy">
-                                </div>
+                                {% if cached_fanart_urls and cached_fanart_urls.get(show.series_id) %}
+                                    <img src="{{ cached_fanart_urls[show.series_id] }}" alt="{{ show.title }}" class="card-poster" loading="lazy">
                                 {% else %}
-                                <div class="poster-container">
-                                    <div class="poster-placeholder" style="background: {{ show.progress_color }}">
-                                        <span class="placeholder-icon">🎬</span>
-                                        <div class="placeholder-title">{{ show.title|truncate(30) }}</div>
+                                    <div class="poster-container">
+                                        <div class="poster-placeholder" style="background: {{ show.progress_color }}">
+                                            <span class="placeholder-icon">🎬</span>
+                                            <div class="placeholder-title">{{ show.title|truncate(30) }}</div>
+                                        </div>
                                     </div>
-                                </div>
                                 {% endif %}
                                 <div class="show-badge" title="Current Season">S{{ "%02d"|format(show.current_season) }}</div>
                                 <div class="status-overall" style="background: {{ show.date_range_color }}; width: 27px; height: 27px;" 
@@ -1754,41 +1767,55 @@
             }
         }
 
-        // Sorting function
+        // Sorting function – optimized with Schwartzian transform
         function applySort() {
             const sortValue = document.getElementById('sortFilter').value;
             const grid = document.getElementById('showsGrid');
             const wrappers = Array.from(document.querySelectorAll('.show-card-wrapper'));
 
-            // Sort the wrappers array
-            wrappers.sort((a, b) => {
-                const cardA = a.querySelector('.show-card');
-                const cardB = b.querySelector('.show-card');
-                if (!cardA || !cardB) return 0;
+            // Build an array of objects containing the node and pre‑parsed values
+            const mapped = wrappers.map(wrapper => {
+                const card = wrapper.querySelector('.show-card');
+                if (!card) return { node: wrapper, sortKey: 0 };
 
-                const getNum = (card, attr) => parseFloat(card.dataset[attr]) || 0;
-                const getTitle = (card) => card.dataset.title || '';
+                const getNum = (attr) => parseFloat(card.dataset[attr]) || 0;
+                const getTitle = () => card.dataset.title || '';
 
+                let sortKey;
                 switch (sortValue) {
                     case 'title':
-                        return getTitle(cardA).localeCompare(getTitle(cardB));
+                        sortKey = getTitle();
+                        break;
                     case 'progress-desc':
-                        return getNum(cardB, 'progress') - getNum(cardA, 'progress');
+                        sortKey = -getNum('progress'); // negative for descending
+                        break;
                     case 'progress-asc':
-                        return getNum(cardA, 'progress') - getNum(cardB, 'progress');
+                        sortKey = getNum('progress');
+                        break;
                     case 'season-progress-desc':
-                        return getNum(cardB, 'seasonProgress') - getNum(cardA, 'seasonProgress');
+                        sortKey = -getNum('seasonProgress');
+                        break;
                     case 'season-progress-asc':
-                        return getNum(cardA, 'seasonProgress') - getNum(cardB, 'seasonProgress');
+                        sortKey = getNum('seasonProgress');
+                        break;
                     case 'next-episode':
-                        return (parseInt(cardA.dataset.nextEpisode) || 9999999999) - (parseInt(cardB.dataset.nextEpisode) || 9999999999);
+                        sortKey = parseInt(card.dataset.nextEpisode) || 9999999999;
+                        break;
                     default:
-                        return 0;
+                        sortKey = 0;
                 }
+                return { node: wrapper, sortKey };
             });
 
-            // Re-append sorted wrappers to the grid
-            wrappers.forEach(wrapper => grid.appendChild(wrapper));
+            // Sort the mapped array
+            mapped.sort((a, b) => {
+                if (a.sortKey < b.sortKey) return -1;
+                if (a.sortKey > b.sortKey) return 1;
+                return 0;
+            });
+
+            // Re‑append nodes in sorted order
+            mapped.forEach(item => grid.appendChild(item.node));
         }
 
         // Combined filter function (search + progress)
