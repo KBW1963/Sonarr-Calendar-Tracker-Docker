@@ -61,26 +61,34 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
             logger.error(err)
             # Continue with empty series
 
-        # ---- Debug: print series status distribution ----
+        # ---- Consolidated debug logging for series ----
         if all_series:
             status_counts = {}
+            monitored_series = 0
+            ended_series = 0
+            total_series = len(all_series)
             for s in all_series:
                 status = s.get('status', 'unknown')
                 status_counts[status] = status_counts.get(status, 0) + 1
+                if s.get('monitored', False):
+                    monitored_series += 1
+                if status == 'ended':
+                    ended_series += 1
+
+            unmonitored_series = total_series - monitored_series
+            continuing_series = total_series - ended_series
+
             logger.info("📊 Series status distribution:")
             for status, count in status_counts.items():
                 logger.info(f"   {status}: {count}")
-
-            # Also count monitored/unmonitored series
-            monitored_series = sum(1 for s in all_series if s.get('monitored', False))
-            unmonitored_series = len(all_series) - monitored_series
             logger.info(f"📊 Monitored series: {monitored_series}, Unmonitored series: {unmonitored_series}")
-
-        # ---- New summary statistics ----
-        logger.info("ℹ️  Counting ended/continuing series...")
-        ended_series = sum(1 for s in all_series if s.get('status') == 'ended')
-        continuing_series = sum(1 for s in all_series if s.get('status') != 'ended')
-        logger.info(f"   ended: {ended_series}, continuing: {continuing_series}")
+            logger.info(f"📊 Ended series: {ended_series}, Continuing series: {continuing_series}")
+        else:
+            ended_series = 0
+            continuing_series = 0
+            monitored_series = 0
+            unmonitored_series = 0
+        # -------------------------------------------------
 
         logger.info("ℹ️  Fetching wanted missing episodes...")
         missing_monitored_count = 0
@@ -110,11 +118,45 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
                 error_message = err
             logger.error(err)
 
+        # ---- Build cached image URLs dictionaries (initial) ----
+        cached_fanart_urls = {}
+        cached_poster_urls = {}
+        if all_series and config.enable_image_cache:
+            try:
+                logger.info("ℹ️  Checking cached images...")
+                for series in all_series:
+                    series_id = series['id']
+                    fanart_url = image_cache.get_cached_image_url(series_id, 'fanart')
+                    if fanart_url:
+                        cached_fanart_urls[series_id] = fanart_url
+                    poster_url = image_cache.get_cached_image_url(series_id, 'poster')
+                    if poster_url:
+                        cached_poster_urls[series_id] = poster_url
+                logger.info(f"✅ Found {len(cached_fanart_urls)} fanart images, {len(cached_poster_urls)} poster images (cached)")
+            except Exception as e:
+                logger.warning(f"Failed to check cached images: {e}")
+
+        # ---- Download any missing images using the authenticated session ----
         if config.enable_image_cache and all_series:
             try:
-                logger.info("ℹ️  Caching images...")
-                image_cache.download_all_posters(all_series)
+                logger.info("ℹ️  Downloading missing images...")
+                # Pass the authenticated session from sonarr client
+                image_cache.download_all_posters(all_series, session=sonarr.session)
                 logger.info("✅ Image cache updated")
+
+                # ---- Rebuild URL dictionaries after download to include new images ----
+                logger.info("ℹ️  Rebuilding image URL cache after download...")
+                cached_fanart_urls = {}
+                cached_poster_urls = {}
+                for series in all_series:
+                    series_id = series['id']
+                    fanart_url = image_cache.get_cached_image_url(series_id, 'fanart')
+                    if fanart_url:
+                        cached_fanart_urls[series_id] = fanart_url
+                    poster_url = image_cache.get_cached_image_url(series_id, 'poster')
+                    if poster_url:
+                        cached_poster_urls[series_id] = poster_url
+                logger.info(f"✅ After download: {len(cached_fanart_urls)} fanart images, {len(cached_poster_urls)} poster images")
             except Exception as e:
                 logger.warning(f"Image caching failed: {e}")
 
@@ -174,6 +216,8 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
             sonarr_client=sonarr,
             library_stats=library_stats,
             range_stats=range_stats,
+            cached_fanart_urls=cached_fanart_urls,
+            cached_poster_urls=cached_poster_urls,
             error_message=error_message
         )
         output_path = Path(config.output_html_file)
@@ -223,6 +267,8 @@ def run_once(config: Config, handler: GracefulInterruptHandler, verbose: bool = 
                 sonarr_client=None,
                 library_stats={},
                 range_stats={},
+                cached_fanart_urls={},
+                cached_poster_urls={},
                 error_message=f"Critical error: {str(e)}"
             )
             output_path = Path(config.output_html_file)
@@ -264,7 +310,7 @@ def main() -> int:
     setup_logging(args.verbose)
     config = load_config(args.config)
 
-    handler = GracefulInterruptHandler()   # single handler for the whole application
+    handler = GracefulInterruptHandler()
 
     try:
         if args.once:
