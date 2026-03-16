@@ -78,36 +78,70 @@ class ImageCache:
         self.handler = interrupt_handler
         self.base_url = base_url
 
-    def _download_one(self, series_id: int, url: str, image_type: str = 'fanart') -> bool:
+    def _download_one(self, series_id: int, url: str, image_type: str, session: Optional[requests.Session] = None) -> bool:
+        """
+        Download one image, using an optional authenticated session.
+        """
         if self.handler.check_interrupt():
+            logger.warning("Download interrupted for series %d %s", series_id, image_type)
             return False
         dest = self.cache_dir / f"{series_id}_{image_type}.jpg"
         if dest.exists():
-            # Optionally check age – for now, just return True (cached)
+            logger.debug("Cached %s for series %d already exists", image_type, series_id)
             return True
         try:
-            resp = requests.get(url, timeout=15)
+            logger.info("Downloading %s for series %d from %s", image_type, series_id, url)
+            if session:
+                resp = session.get(url, timeout=15)
+            else:
+                resp = requests.get(url, timeout=15)
             resp.raise_for_status()
             dest.write_bytes(resp.content)
+            logger.info("Successfully downloaded %s for series %d", image_type, series_id)
             return True
         except Exception as e:
-            logger.debug("Failed to download %s: %s", url, e)
+            logger.warning("Failed to download %s for series %d: %s", image_type, series_id, e)
             return False
 
-    def download_all_posters(self, all_series: List[Dict]) -> int:
-        """Download posters for all series in parallel. Returns number successfully downloaded/verified."""
+    def download_all_posters(self, all_series: List[Dict], session: Optional[requests.Session] = None) -> int:
+        """
+        Download both fanart and poster for all series in parallel.
+        If session is provided, it will be used for authentication.
+        Returns number successfully downloaded/verified.
+        """
         tasks = []
         with ThreadPoolExecutor(max_workers=5) as executor:
             for series in all_series:
                 series_id = series['id']
-                # Use preferred_type='fanart' to get fanart for main cards
-                url = get_poster_url(series, preferred_type='fanart', base_url=self.base_url)
-                if url:
-                    tasks.append(executor.submit(self._download_one, series_id, url, 'fanart'))
+                # Fanart for main cards
+                fanart_url = get_poster_url(series, preferred_type='fanart', base_url=self.base_url)
+                if fanart_url:
+                    tasks.append(executor.submit(self._download_one, series_id, fanart_url, 'fanart', session))
+                else:
+                    logger.warning("No fanart URL for series %d", series_id)
+                # Poster for completed seasons
+                poster_url = get_poster_url(series, preferred_type='poster', base_url=self.base_url)
+                if poster_url:
+                    tasks.append(executor.submit(self._download_one, series_id, poster_url, 'poster', session))
+                else:
+                    logger.warning("No poster URL for series %d", series_id)
             success = 0
             for future in as_completed(tasks):
                 if self.handler.check_interrupt():
                     break
                 if future.result():
                     success += 1
+        logger.info(f"Downloaded/verified {success} images total")
         return success
+
+    def get_cached_image_url(self, series_id: int, image_type: str = 'fanart') -> Optional[str]:
+        """
+        Return the public relative URL path for a cached image of the specified type if the file exists.
+        The URL is relative (e.g., '/images/123_fanart.jpg') – your web server
+        should serve the cache directory at '/images/'.
+        """
+        dest = self.cache_dir / f"{series_id}_{image_type}.jpg"
+        if dest.exists():
+            # Always return a relative path starting with /images/
+            return f"/images/{series_id}_{image_type}.jpg"
+        return None
