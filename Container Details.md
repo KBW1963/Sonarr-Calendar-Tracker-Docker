@@ -1,4 +1,5 @@
 Provided as an overview for those who are interested and have a Docker environment to follow/test.
+
 ```
 1. Project Structure
    Project has the following layout (relative to the Dockerfile):
@@ -25,10 +26,13 @@ sonarr-calendar/
 |── changelog.md
 └── README.md
 ```
+
 ---
+
 2. Create a `.dockerignore` File
 
 Hopefully this keeps the image small by excluding unnecessary files.
+
 ```
 .git
 __pycache__
@@ -48,8 +52,11 @@ docker-compose_TrueNAS.yml
 sonarr*.py
 
 ```
+
 ---
+
 3. Create the Dockerfile
+
 ```
 # Use an official Python runtime as base image
 FROM python:3.11-slim
@@ -87,10 +94,13 @@ ENTRYPOINT ["python", "-m", "sonarr_calendar"]
 # Default command (auto-refresh mode)
 CMD []
 ```
+
 - Base image: python:3.11-slim is lightweight and Debian-based, suitable for all platforms.
 - Non‑root user: Improves security.
 - Entrypoint: Allows overriding the command (e.g., --once).
+
 ---
+
 4. Create docker-compose.yml
 
 ```yaml
@@ -153,6 +163,12 @@ services:
       # Timezone for correct log timestamps (e.g., Europe/London, America/New_York). Default: UTC.
       # - TZ=Europe/London
 
+      # ---------- OPTIONAL (if you wish to add your own logo) ----------
+      # Note: The logo file must be placed in the same host directory that is mounted to /output, so that it is available at /logo.png relative to the web root. In this example, copy your logo to /path/on/host/calendar_data/logo.png.
+
+      # - CUSTOM_LOGO_URL=/logo.png                      # relative path from web root
+      # - SONARR_PUBLIC_URL=https://sonarr.example.com   # public domain for links
+
     volumes:
       # Mount a host directory where the HTML file and cached images will be stored.
       # The directory must be writable by the container (user ID 1000 inside the container).
@@ -167,8 +183,11 @@ networks:
   sonarr-network:
     driver: bridge
 ```
+
 ---
+
 ## Important Notes
+
 - Permissions: The container runs as a non‑root user with UID 1000. Ensure the mounted host directory (`/path/on/host)` is owned by UID 1000 or is world‑writable (e.g., chmod 777). Better: chown 1000:1000 `/path/on/host`.
 
 - Sonarr URL: Use the internal URL that is accessible from within the Docker network. If Sonarr is on the same host, use `http://host.docker.internal:8989` (on Docker Desktop) or the host's internal IP (e.g., `http://192.168.1.100:8989`). If Sonarr is another container, use its service name and port (e.g., `http://sonarr:8989`).
@@ -182,28 +201,29 @@ networks:
 This configuration provides a solid starting point. Adjust paths and variables to match your setup.
 
 ---
+
 5. Building and Running the Container
 
 Build the image
+
 ```
 docker-compose build
 ```
+
 Run in auto‑refresh mode (default)
+
 ```
 docker-compose up -d
 ```
+
 Run once (to generate HTML and exit)
+
 ```
 docker-compose run --rm sonarr-calendar --once
 ```
+
 View logs
+
 ```
 docker-compose logs -f
 ```
-
-
-
-
-
-
-

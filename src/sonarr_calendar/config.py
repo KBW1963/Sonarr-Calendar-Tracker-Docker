@@ -9,14 +9,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class Config:
-    # Required fields (no defaults)
     sonarr_url: str
     sonarr_api_key: str
     days_past: int
     days_future: int
     output_html_file: str
-
-    # Optional fields (all have defaults)
+    # Optional fields with defaults
     output_json_file: Optional[str] = None
     image_cache_dir: str = "sonarr_images"
     refresh_interval_hours: int = 6
@@ -24,8 +22,10 @@ class Config:
     grid_columns: int = 4
     image_quality: str = "fanart"
     enable_image_cache: bool = True
-    image_base_url: str = ""          # <-- new field moved here
     html_title: str = "Sonarr Calendar Pro"
+    sonarr_public_url: Optional[str] = None
+    custom_logo_path: Optional[str] = None   # local file path inside container
+    custom_logo_url: Optional[str] = None    # remote URL
 
     def __post_init__(self):
         if not self.sonarr_url.startswith(('http://', 'https://')):
@@ -83,7 +83,9 @@ def load_config(config_path: Optional[Path] = None) -> Config:
         grid_columns=_get_env_int('GRID_COLUMNS', 4),
         image_quality=os.getenv('IMAGE_QUALITY', 'fanart'),
         enable_image_cache=_get_env_bool('ENABLE_IMAGE_CACHE', True),
-        image_base_url=os.getenv('IMAGE_BASE_URL', ""),   # <-- new optional env var
         html_title=os.getenv('HTML_TITLE', 'Sonarr Calendar Pro'),
+        sonarr_public_url=os.getenv('SONARR_PUBLIC_URL'),
+        custom_logo_path=os.getenv('CUSTOM_LOGO_PATH'),
+        custom_logo_url=os.getenv('CUSTOM_LOGO_URL'),
     )
     return config

@@ -5,32 +5,36 @@ services:
     restart: unless-stopped
     environment:
       # Required
-      - SONARR_URL=http://192.168.1.100:8989         # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network) 
-      - SONARR_API_KEY=Your_secret_API_Key           # API key from Sonarr (Settings > General > Security)
+      - SONARR_URL=http://192.168.1.100:8989 # URL to your Sonarr instance (use the service name 'sonarr' if it's in the same Docker network)
+      - SONARR_API_KEY=Your_secret_API_Key # API key from Sonarr (Settings > General > Security)
       - DAYS_PAST=7
       - DAYS_FUTURE=30
-      - OUTPUT_HTML_FILE=/output/TV.html                  # output HTML file path (must be in a mounted volume)
+      - OUTPUT_HTML_FILE=/output/TV.html # output HTML file path (must be in a mounted volume)
       # Optional (with defaults shown)
       # - OUTPUT_JSON_FILE=/output/sonarr_data.json       # optional – remove if not wanted
-      - IMAGE_CACHE_DIR=/cache                            # default: sonarr_images
-      - REFRESH_INTERVAL_HOURS=6                          # default: 6
-      - HTML_THEME=dark                                   # default: dark
-      - IMAGE_QUALITY=fanart                              # default: fanart
-      - ENABLE_IMAGE_CACHE=true                           # default: true
-      - HTML_TITLE="My Sonarr Dashboard"                  # default: Sonarr Calendar Pro
-      - TZ=Europe/London                                  # for correct log timestamps
+      - IMAGE_CACHE_DIR=/cache # default: sonarr_images
+      - REFRESH_INTERVAL_HOURS=6 # default: 6
+      - HTML_THEME=dark # default: dark
+      - IMAGE_QUALITY=fanart # default: fanart
+      - ENABLE_IMAGE_CACHE=true # default: true
+      - HTML_TITLE="My Sonarr Dashboard" # default: Sonarr Calendar Pro
+      - TZ=Europe/London # for correct log timestamps
+
+      # ---------- OPTIONAL (if you wish to add your own logo) ----------
+      # Note: The logo file must be placed in the same host directory that is mounted to /output, so that it is available at /logo.png relative to the web root. In this example, copy your logo to /path/on/host/calendar_data/logo.png.
+
+      # - CUSTOM_LOGO_URL=/logo.png                      # relative path from web root
+      # - SONARR_PUBLIC_URL=https://sonarr.example.com   # public domain for links
+
     volumes:
+      # Mount a host directory where the HTML file and cached images will be stored.
+      # The directory must be writable by the container (user ID 1000 inside the container).
+      # Replace `/path/on/host` with the actual path on your server.
       - ./output:/output
       - ./cache:/cache
     networks:
       - sonarr-network
- 
 
 networks:
   sonarr-network:
-
     driver: bridge
-
-
-
-

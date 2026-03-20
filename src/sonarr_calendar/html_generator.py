@@ -61,18 +61,18 @@ class HTMLGenerator:
 
     def generate(self, shows: List[ProcessedShow], episodes: List[Dict], date_range: DateRange,
                  sonarr_client, library_stats: Dict[str, Any], range_stats: Dict[str, Any],
+                 cached_fanart_urls: Optional[Dict[int, str]] = None,
+                 cached_poster_urls: Optional[Dict[int, str]] = None,
                  error_message: Optional[str] = None) -> str:
         """
         Generate the HTML calendar.
-        If error_message is provided, it will be displayed prominently.
+        cached_fanart_urls maps series_id to public URL for cached fanart (used in main cards).
+        cached_poster_urls maps series_id to public URL for cached poster (used in completed seasons).
         """
-        # DEBUG lines are commented out for normal operation
-        # logger.info("\n=== DEBUG in html_generator.generate ===")
-        # logger.info(f"shows list has {len(shows)} items")
-        # if shows:
-        #     logger.info(f"First show: {shows[0].title} (ID: {shows[0].series_id})")
-        # else:
-        #     logger.info("shows list is EMPTY!")
+        if cached_fanart_urls is None:
+            cached_fanart_urls = {}
+        if cached_poster_urls is None:
+            cached_poster_urls = {}
 
         from sonarr_calendar.models import calculate_completed_seasons_in_range
 
@@ -84,7 +84,14 @@ class HTMLGenerator:
                 )
             except Exception as e:
                 logger.error(f"Failed to calculate completed seasons: {e}")
-        # logger.info(f"DEBUG: completed_seasons returned {len(completed_seasons)} items")
+
+        # Determine custom logo source
+        logo_src = None
+        if self.config.custom_logo_url:
+            logo_src = self.config.custom_logo_url
+        elif self.config.custom_logo_path:
+            # Path is inside the container; the file should be mounted
+            logo_src = self.config.custom_logo_path
 
         template = self.env.get_template('calendar.html.j2')
         return template.render(
@@ -97,7 +104,10 @@ class HTMLGenerator:
             library_stats=library_stats,
             range_stats=range_stats,
             completed_seasons=completed_seasons,
+            cached_fanart_urls=cached_fanart_urls,
+            cached_poster_urls=cached_poster_urls,
             error_message=error_message,
+            logo_src=logo_src,           # NEW
             DISPLAY_EPISODES_LIMIT=2,
             EPISODE_ITEM_HEIGHT=80,
             EXPAND_BUTTON_HEIGHT=42
