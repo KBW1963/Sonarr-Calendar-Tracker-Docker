@@ -303,7 +303,7 @@ Diagnosis
 {% endif %}
 ```
 
-# 5.2 Cache Directory Fills Up
+### 5.2 Cache Directory Fills Up
 
 Symptoms
 
