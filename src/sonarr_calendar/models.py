@@ -18,7 +18,7 @@ MAX_MULTI_EPISODE_DISPLAY = 2
 MAX_EPISODE_LIST_LENGTH = 15
 
 # ============================================================================
-# Helper functions for formatting multi‑episode displays
+# Helper functions for formatting multi‑episode displays (no longer used, but kept for compatibility)
 # ============================================================================
 
 def truncate_text(text, max_length):
@@ -219,29 +219,42 @@ def calculate_progress(series: SeriesInfo) -> Tuple[
 
     monitored = 0
     unmonitored = 0
+    current_season = 0
+    current_season_total = 0
+    current_season_downloaded = 0
+
+    # First pass: count monitored/unmonitored seasons and find the current season
     for s in series.seasons:
         sn = s.get('seasonNumber', 0)
-        if sn <= 0:                     # skip season 0 (specials) and negative
-            continue
+        if sn <= 0:
+            continue   # ignore specials
+        stats = s.get('statistics', {})
+        total_in_season = stats.get('totalEpisodeCount', 0)
+
+        # Count monitored/unmonitored for display
         if s.get('monitored'):
             monitored += 1
         else:
             unmonitored += 1
 
-    current_season = 0
-    for s in series.seasons:
-        sn = s.get('seasonNumber', 0)
-        if sn > current_season and s.get('monitored') and s.get('statistics', {}).get('totalEpisodeCount', 0) > 0:
+        # Determine current season: highest season number that has any episodes
+        if total_in_season > 0 and sn > current_season:
             current_season = sn
-
-    current_season_total = 0
-    current_season_downloaded = 0
-    for s in series.seasons:
-        if s.get('seasonNumber') == current_season:
-            stats = s.get('statistics', {})
-            current_season_total = stats.get('totalEpisodeCount', 0)
+            current_season_total = total_in_season
             current_season_downloaded = stats.get('episodeFileCount', 0)
-            break
+
+    # If no regular season found, fall back to season 0 (specials)
+    if current_season == 0:
+        # Try to find specials (season 0) with episodes
+        for s in series.seasons:
+            if s.get('seasonNumber') == 0:
+                stats = s.get('statistics', {})
+                if stats.get('totalEpisodeCount', 0) > 0:
+                    current_season = 0
+                    current_season_total = stats.get('totalEpisodeCount', 0)
+                    current_season_downloaded = stats.get('episodeFileCount', 0)
+                    break
+
     current_progress = (current_season_downloaded / current_season_total * 100) if current_season_total else 0
     current_complete = current_progress >= 100
 
@@ -277,39 +290,31 @@ def process_calendar_data(
 ) -> List[ProcessedShow]:
     series_map = {s['id']: SeriesInfo.from_api(s) for s in all_series}
 
-    # First, convert all episodes to Episode objects and group by series and date
-    raw_episodes_by_series_and_date = defaultdict(lambda: defaultdict(list))
+    # Group episodes by series (no date grouping needed)
+    episodes_by_series = defaultdict(list)
     for ep in episodes:
         episode_obj = Episode.from_api(ep)
         series_id = ep['seriesId']
-        air_date = episode_obj.air_date
-        if air_date:
-            raw_episodes_by_series_and_date[series_id][air_date].append(episode_obj)
+        if episode_obj.air_date:
+            episodes_by_series[series_id].append(episode_obj)
 
     processed = []
-    for series_id, date_dict in raw_episodes_by_series_and_date.items():
+    for series_id, ep_list in episodes_by_series.items():
         series = series_map.get(series_id)
         if not series:
             logger.warning(f"Series {series_id} not found, skipping")
             continue
 
-        # Instead of grouping by date, treat each episode individually
-        all_episodes = []
-        total_individual_episodes = 0
+        # Sort episodes by air date, then season, then episode number
+        ep_list.sort(key=lambda e: (e.air_date or date.max, e.season_number, e.episode_number))
+        total_individual_episodes = len(ep_list)
 
-        for air_date, ep_list in sorted(date_dict.items()):
-            ep_list.sort(key=lambda x: (x.season_number, x.episode_number))
-            for ep in ep_list:
-                all_episodes.append(ep)
-                total_individual_episodes += 1
-
-        # Filter those within the date range (they already are, but ensure)
-        in_range = [ep for ep in all_episodes if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
+        # Filter those within the date range
+        in_range = [ep for ep in ep_list if ep.air_date and date_range.start <= ep.air_date <= date_range.end]
 
         # Calculate progress for the series
-        # MODIFIED: Use config.image_base_url for image URLs instead of config.sonarr_url
-        poster_url = get_poster_url(series, config.image_quality, config.image_base_url)
-        poster_url_poster = get_poster_url(series, 'poster', config.image_base_url)
+        poster_url = get_poster_url(series, config.image_quality, config.sonarr_url)
+        poster_url_poster = get_poster_url(series, 'poster', config.sonarr_url)
 
         (overall, color,
          monitored, unmonitored, _,
@@ -377,28 +382,51 @@ def process_calendar_data(
     return processed
 
 def calculate_overall_statistics(shows: List[ProcessedShow], date_range) -> Dict[str, Any]:
-    """Calculate statistics for shows that have episodes in the date range."""
+    """
+    Calculate statistics for shows that have episodes in the date range using a single loop.
+    """
     total_series = len(shows)
 
-    total_episodes_all = sum(s.total_episodes for s in shows)
-    total_downloaded_all = sum(s.downloaded_episodes for s in shows)
-    total_seasons_all = sum(s.total_seasons for s in shows)
-    monitored_seasons = sum(s.monitored_seasons for s in shows)
-    unmonitored_seasons = sum(s.unmonitored_seasons for s in shows)
+    total_episodes_all = 0
+    total_downloaded_all = 0
+    total_seasons_all = 0
+    monitored_seasons = 0
+    unmonitored_seasons = 0
+    total_episodes_in_range = 0
+    total_downloaded_in_range = 0
+    shows_with_episodes = 0
+    shows_complete = 0
+    shows_high_progress = 0
+    shows_medium_progress = 0
+    shows_low_progress = 0
+    shows_not_started = 0
 
-    total_episodes_in_range = sum(s.date_range_episodes for s in shows)
-    total_downloaded_in_range = sum(s.date_range_downloaded for s in shows)
+    for s in shows:
+        total_episodes_all += s.total_episodes
+        total_downloaded_all += s.downloaded_episodes
+        total_seasons_all += s.total_seasons
+        monitored_seasons += s.monitored_seasons
+        unmonitored_seasons += s.unmonitored_seasons
 
-    shows_with_episodes = sum(1 for s in shows if s.date_range_episodes > 0)
-    shows_complete = sum(1 for s in shows if s.current_season_complete)
+        total_episodes_in_range += s.date_range_episodes
+        total_downloaded_in_range += s.date_range_downloaded
+
+        if s.date_range_episodes > 0:
+            shows_with_episodes += 1
+        if s.current_season_complete:
+            shows_complete += 1
+
+        if 75 <= s.progress_percentage < 100:
+            shows_high_progress += 1
+        elif 25 <= s.progress_percentage < 75:
+            shows_medium_progress += 1
+        elif 0 < s.progress_percentage < 25:
+            shows_low_progress += 1
+        else:
+            shows_not_started += 1
 
     overall_progress = (total_downloaded_all / total_episodes_all * 100) if total_episodes_all else 0
     overall_date_range_progress = (total_downloaded_in_range / total_episodes_in_range * 100) if total_episodes_in_range else 0
-
-    shows_high_progress = sum(1 for s in shows if 75 <= s.progress_percentage < 100)
-    shows_medium_progress = sum(1 for s in shows if 25 <= s.progress_percentage < 75)
-    shows_low_progress = sum(1 for s in shows if 0 < s.progress_percentage < 25)
-    shows_not_started = sum(1 for s in shows if s.progress_percentage == 0)
 
     return {
         'total_series': total_series,
