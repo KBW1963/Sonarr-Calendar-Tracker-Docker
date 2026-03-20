@@ -77,7 +77,7 @@ Or, as a temporary test, set world‑writable permissions (less secure):
 sudo chmod 777 /path/to/host/output
 ```
 
-# 2. Environment Variables & Configuration
+## 2. Environment Variables & Configuration
 
 ### 2.1 Missing Required Variables
 
@@ -135,7 +135,7 @@ Diagnosis
 - Avoid internal IPs – they won’t work externally.
 - Ensure the file has read permissions for the nginx user.
 
-# 3. Docker Deployment & Logs
+## 3. Docker Deployment & Logs
 
 ### 3.1 Container Keeps Restarting
 
@@ -192,7 +192,7 @@ The tracker is attempting to download images from a URL that requires authentica
 
 Symptoms
 
-- Generated HTML contains relative URLs like /images/123_fanart.jpg, but the image returns 404 in the browser.
+- Generated HTML contains relative URLs like `/images/123_fanart.jpg`, but the image returns 404 in the browser.
 
 Diagnosis
 
@@ -215,7 +215,7 @@ location /images/ {
 - Ensure the cache directory is mounted into the nginx container at the path used in the alias.
 - Restart nginx after configuration changes.
 
-# 4. Web Server (nginx) & External Access
+## 4. Web Server (nginx) & External Access
 
 ### 4.1 Images Load in HTML but Not Displayed (Mixed Content)
 
@@ -275,7 +275,7 @@ Symptoms
 - Option A (simple): Keep the port and use the local DNS with the port in the URL.
 - Option B (port 80): Change the port mapping in docker-compose.yml to 80:80, but ensure no other service uses port 80 on the host.
 
-# 5. Image Caching & Poster/Fanart
+## 5. Image Caching & Poster/Fanart
 
 ### 5.1 Completed Seasons Show Placeholders (or Fanart) Instead of Posters
 
@@ -314,7 +314,7 @@ Solution
 - The cache is designed to hold one fanart and one poster per series. You can manually delete old files if needed.
 - Consider setting up a cron job to remove files older than X days if disk space is a concern.
 
-# 6. HTML Template Customizations
+## 6. HTML Template Customizations
 
 ### 6.1 Custom Logo Not Aligned Correctly
 
@@ -343,7 +343,7 @@ Solution
 - Ensure the template correctly sets these attributes (they are automatically set if the data is available).
 - If you modified the template, double‑check that the loops are correct.
 
-# 7. Logging & Debugging
+## 7. Logging & Debugging
 
 ### 7.1 Enable Verbose Logging
 
@@ -365,7 +365,7 @@ This prints all API requests and image download attempts.
 - `docker logs sonarr-monitor` – shows stdout/stderr from the container.
 - Use `docker logs -f sonarr-monitor` to follow logs in real time.
 
-# 8. Advanced: Building a Custom Docker Image
+## 8. Advanced: Building a Custom Docker Image
 
 If you’ve made modifications to the source and want to avoid mounting the code every time, build your own image:
 
@@ -384,7 +384,7 @@ WORKDIR /app
 
 This ensures your changes are always present without a separate source volume mount.
 
-# 9. Final Checklist
+## 9. Final Checklist
 
 Before reporting an issue, verify the following:
 
