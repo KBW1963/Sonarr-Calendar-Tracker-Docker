@@ -327,7 +327,7 @@ Solution
 - Adjust the CSS for `.custom-logo-inline` (e.g., `change max-height` and `max-width`).
 - Ensure the header container uses Flexbox as described in the documentation.
 
-# 6.2 Progress Bars Not Appearing
+### 6.2 Progress Bars Not Appearing
 
 Symptoms
 
