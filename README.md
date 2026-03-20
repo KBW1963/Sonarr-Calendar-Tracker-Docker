@@ -149,7 +149,7 @@ Below is a complete list of supported variables, their requirements, description
 | `HTML_TITLE`             | No       | Browser tab title for the generated HTML page.                                                                                                                                             | `Sonarr Calendar Pro`              | `My Sonarr Dashboard`       |
 | `TZ`                     | No       | Container timezone (used for log timestamps and date calculations).                                                                                                                        | `UTC`                              | `America/New_York`          |
 | `CUSTOM_LOGO_URL`        | No       | your logo file location                                                                                                                                                                    | relative path from web root        |
-| `SONARR_PUBLIC_URL`      | No       | https://sonarr.example.com                                                                                                                                                                 | public domain for links            |
+| `SONARR_PUBLIC_URL`      | No       | Make sure the URL is publicly accessible (or accessible to your users). The browser will fetch the image from that location.                                                               | public domain for links            | https://sonarr.example.com  |
 
 ### ⚠️ Important Notes
 
