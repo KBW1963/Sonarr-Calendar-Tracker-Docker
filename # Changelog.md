@@ -7,6 +7,14 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
+## [3.7.1] - 2026-03-20
+
+### Fixed
+
+- **Current season detection** – The logic that determines the current season now considers **all regular seasons** (season number > 0) with episodes, not only monitored ones. This resolves an issue where a show with complete, unmonitored seasons would incorrectly show `S00` as the current season instead of the highest completed season.
+- **Fallback for specials** – If no regular season has episodes, the current season falls back to specials (season 0), ensuring the card still displays relevant information.
+- **Completed seasons section** – Shows with a completed regular season (even if unmonitored) now correctly appear in the “Recently Completed Seasons” section if the last episode falls within the date range.
+
 ## [3.7.0] - 2026-03-15
 
 ### Added
@@ -49,6 +57,8 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 - **`models.py`** – `calculate_progress` now iterates through seasons only once, reducing overhead.
 - **`utils.py`** – `calculate_overall_statistics` now replaces multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
+- **`utils.py`**`calculate_overall_statistics`\*\* – Replaced multiple `sum` comprehensions with a single loop, cutting the number of passes over the shows list from ~8 to 1.
+
 - **`process_calendar_data`** – Simplified episode collection by removing unnecessary date grouping; episodes are now appended directly to a list and sorted once, improving efficiency for large calendars.
 
 ### Changed
