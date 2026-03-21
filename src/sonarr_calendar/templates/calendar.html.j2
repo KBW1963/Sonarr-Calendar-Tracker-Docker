@@ -241,6 +241,47 @@
             flex-wrap: wrap;
         }
 
+        /* Header with inline logo */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .logo-left {
+            flex: 0 0 auto;
+            width: 80px; /* reserve space for logo */
+        }
+        .custom-logo-inline {
+            max-height: 100px;
+            width: auto;
+            vertical-align: middle;
+        }
+        h1 {
+            margin: 0;
+            text-align: center;
+            flex: 1;
+        }
+        .spacer-right {
+            flex: 0 0 auto;
+            width: 80px; /* same as logo-left to balance */
+            visibility: hidden;
+        }
+        @media (max-width: 600px) {
+            .header-container {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .logo-left, .spacer-right {
+                width: auto;
+                flex: 1;
+            }
+            .custom-logo-inline {
+                max-height: 40px;
+            }
+        }
+        
         /* ---------- Summary Grid (Sentence Cards) ---------- */
         .summary-grid {
             display: grid;
@@ -1183,7 +1224,15 @@
         </a>
 
         <header>
-            <h1><i class="fas fa-tv"></i> Upcoming TV Shows</h1>
+                        <div class="header-container">
+                <div class="logo-left">
+                    {% if logo_src %}
+                    <img src="{{ logo_src }}" alt="Custom Logo" class="custom-logo-inline">
+                    {% endif %}
+                </div>
+                <h1><i class="fas fa-tv"></i> {{ config.html_title }}</h1>
+                <div class="spacer-right"></div>
+            </div>
 
             <!-- Library heading -->
             <div class="library-heading">
