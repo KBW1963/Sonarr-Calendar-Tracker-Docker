@@ -1,6 +1,6 @@
 # Sonarr Calendar Tracker – Troubleshooting Guide
 
-This guide helps you diagnose and fix common issues when deploying the Sonarr Calendar Tracker. Follow the steps in order, or jump to the section that matches your problem.
+This guide provides help if you need to diagnose and fix common issues when deploying the Sonarr Calendar Tracker. Follow the steps in order, or jump to the section that matches your problem.
 
 ---
 
