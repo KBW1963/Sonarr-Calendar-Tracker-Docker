@@ -370,6 +370,7 @@ This prints all API requests and image download attempts.
 If you’ve made modifications to the source and want to avoid mounting the code every time, build your own image:
 
 1.Copy your modified source into a directory.
+
 2.Create a Dockerfile:
 
 ```dockerfile
