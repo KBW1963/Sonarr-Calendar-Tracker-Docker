@@ -13,8 +13,9 @@ location /images/ {
 Ensure the alias points to the correct host directory (the one mounted as `/output` in the tracker container).
 
 ## `custom.conf`
+This file was placed inside the nginx container at `/etc/nginx/conf.d/default.conf` (or mounted as a volume). It serves the static HTML from the root directory and handles image requests under `/images/`.
 
-The custom.conf file is a minimal nginx configuration that serves both your public calendar (root) and a local version under `/local`, as well as the image cache. Here's the file with explanations:
+The `custom.conf` file is a minimal nginx configuration that serves both your public calendar (root) and a local version under `/local`, as well as the image cache. Here's the file with explanations:
 
 ```conf
 server {
@@ -64,6 +65,13 @@ An optional location to serve a different version of the calendar (if you have o
 - `add_header Cache-Control "public, immutable"` allows browsers to cache the images aggressively.
 
 - `try_files $uri =404`; returns a 404 if the image file does not exist.
+
+Here's the relevant volume mount from the `nginx.yml`:
+```yaml
+volumes:
+  - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
+```
+This maps the host file `/mnt/truenas/app_configs/nginx/custom.conf` to the container path `/etc/nginx/conf.d/default.conf`. So nginx loads that configuration on startup. The file name on the host (`custom.conf`) is arbitrary; what matters is the mount point inside the container. As long as the mount is correct, nginx will use that configuration.
 
 ## 🧩 How it fits the  deployment
 - The tracker writes images to `/output/sonarr_images` inside its container, which is mapped to the host directory `/mnt/truenas/media/sonarr730/sonarr_images` (your output volume).
