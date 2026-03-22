@@ -2,29 +2,31 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![AI Assisted Yes](https://img.shields.io/badge/AI%20Assisted-Yes-red)
 ![Last Commit](https://img.shields.io/github/last-commit/KBW1963/sonarr-calendar-tracker?style=flat-square)
 
 ---
 
 # Sonarr Calendar Tracker - Docker version
 
-A beautiful, feature‑rich HTML dashboard for your [Sonarr](http://sonarr.tv) shows.  
-Monitor upcoming episodes over a specified date range, track overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
+The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, interactive HTML dashboard from your Sonarr library. It fetches episode and series data, caches images, and displays upcoming episodes in a card‑based layout with progress bars, filters, and sorting. It is designed to be run in Docker, producing a static HTML file that can be served by any web server (e.g., nginx). The project has evolved significantly through user feedback, adding features like dual‑image caching, custom logos, season‑based progress filters, and a responsive design.
 
 ### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
 
 ---
 
-\*\*NOTE: I am not a SW developer or a coder by trade. I have a little knowledge to be dangerous and have used some skills from my past working life and my hobbyist approach to build this project.
-And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
+>[!NOTE]
+>I am not a SW developer or a coder by trade. I have a little knowledge to be dangerous and have used some skills from my past working life and my hobbyist approach to build this project.
+>And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
 
-To hopefully assit those that may find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
+>To hopefully assit those that may find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
+>The tracker has been designed to run locally on your own hardware and network. However, I am currently reunning behind a proxy utilising [Pangolin](https://pangolin.net) on a VPS and [Nginx](https://nginx.org/) running on TrueNAS.
+>I am releasing it to the community AS IS and provide no support or warranty.
 
-The tracker has been designed to run locally on your own hardware and network. It hasn't been designed to be exposed to the outside world.
 
-I am releasing it to the community AS IS and provide no support or warranty. Use at your own risk. ALWAYS backup before installing.
-
-I am happy with it for my needs and will NOT be constantly developing it, sorry 😞.
+>[!CAUTION]
+>Use at your own risk. ALWAYS backup before installing.
+>I am happy with it for my needs and will NOT be constantly developing it, sorry 😞.
 
 ## So, please be understanding! ☺️.
 
@@ -151,15 +153,20 @@ Below is a complete list of supported variables, their requirements, description
 | `CUSTOM_LOGO_URL`        | No       | your logo file location                                                                                                                                                                    | relative path from web root        | `/output/logo.png`           |
 | `SONARR_PUBLIC_URL`      | No       | Make sure the URL is publicly accessible (or accessible to your users). The browser will fetch the image from that location.                                                               | public domain for links            | `https://sonarr.example.com` |
 
-### ⚠️ Important Notes
+>[!IMPORTANT]
+>Important Notes
+>- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
+>- **Path variables** (`OUTPUT_HTML_FILE`, `OUTPUT_JSON_FILE`, `IMAGE_CACHE_DIR`) should point to locations inside **mounted volumes** to ensure data persists across container restarts.
+>- The container runs as a non‑root user with a fixed UID (usually `100`). When using host‑mounted directories, ensure they are owned by that UID (or set permissions accordingly).
+>- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
+>- **Logo size** The logo is automatically constrained to a maximum height of 60px (adjustable in CSS if needed). It will not stretch the header.
+>- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
+>- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file.
 
-- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
-- **Path variables** (`OUTPUT_HTML_FILE`, `OUTPUT_JSON_FILE`, `IMAGE_CACHE_DIR`) should point to locations inside **mounted volumes** to ensure data persists across container restarts.
-- The container runs as a non‑root user with a fixed UID (usually `100`). When using host‑mounted directories, ensure they are owned by that UID (or set permissions accordingly).
-- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
-- **Logo size** The logo is automatically constrained to a maximum height of 60px (adjustable in CSS if needed). It will not stretch the header.
-- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
-- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file:
+>If you wish to add/use your own logo the:
+- Public URL (SONARR_PUBLIC_URL) is used for links in the HTML (e.g., clicking a show title). If omitted, it defaults to SONARR_URL.
+- Image caching is enabled by default. The cache directory is inside the output volume (/output/sonarr_images). This directory must be served by your web server (see nginx configuration).
+- Custom logo – place a logo file in the web root and set CUSTOM_LOGO_URL=/logo.png. The logo appears inline with the page title.
 
 ---
 
@@ -192,17 +199,30 @@ that the relative path `sonarr_images/...` resolves correctly. The easiest way i
 
 To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
 
-\*\*NOTE: I haven't actually tested this method.
+>[!NOTE]
+>As stated I am running my version behind a proxy to serve the images.
+>Example below:
 
 ```
-nginx:
-  image: nginx:alpine
-  ports:
-    - "8080:80"
-  volumes:
-    - ./output:/usr/share/nginx/html:ro
-  depends_on:
+services:
+  web:
+    image: nginx:alpine
+    container_name: truenas-web
+    restart: unless-stopped
+    ports:
+      - <TrueNAS IP>:8081:80
+    volumes:
+      # public HTML (root)
+      - /mnt/truenas/media/sonarr730:/usr/share/nginx/html:ro
+      # local HTML (subfolder)  
+      - /mnt/truenas/media/sonarr730/sonarr_images:/usr/share/nginx/images_cache:ro
+      # Sonarr's own media cover (optional, not used by calendar)
+      - /mnt/truenas/app_configs/sonarr/MediaCover:/usr/share/nginx/html/MediaCover:ro
+      # nginx conf  
+      - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
+networks: {}
     - sonarr-calendar
 ```
+Ensure the alias points to the correct host directory (the one mounted as /output in the tracker container).
 
-Then access `http://your-host-ip:8080/UpcomingTV.html`.
+Then access `http://your-host-ip:8081/UpcomingTV.html`.
