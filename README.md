@@ -216,8 +216,6 @@ services:
       - /mnt/truenas/media/sonarr730:/usr/share/nginx/html:ro
       # local HTML (subfolder)  
       - /mnt/truenas/media/sonarr730/sonarr_images:/usr/share/nginx/images_cache:ro
-      # Sonarr's own media cover (optional, not used by calendar)
-      - /mnt/truenas/app_configs/sonarr/MediaCover:/usr/share/nginx/html/MediaCover:ro
       # nginx conf  
       - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
 networks: {}
