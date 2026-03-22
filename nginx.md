@@ -1,21 +1,38 @@
 # Nginx Configuration (External Web Server)
-If you serve the calendar via nginx, add a location block to serve images:
 
-```conf
-location /images/ {
-    alias /usr/share/nginx/html/sonarr_images/;
-    expires 30d;
-    add_header Cache-Control "public, immutable";
-    try_files $uri =404;
-}
+To view the dashboard in a browser, you can add an nginx container that serves the output directory.
+>[!NOTE]
+>As stated I am running my version behind a proxy to serve the images.
 
+Example nginx `docker-compose.yml` below:
+
+```
+services:
+  web:
+    image: nginx:alpine
+    container_name: truenas-web
+    restart: unless-stopped
+    ports:
+      - <TrueNAS IP>:8081:80
+    volumes:
+      # public HTML (root)
+      - /mnt/truenas/media/sonarr730:/usr/share/nginx/html:ro
+      # local HTML (subfolder)  
+      - /mnt/truenas/media/sonarr730/sonarr_images:/usr/share/nginx/images_cache:ro
+      # nginx conf  
+      - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
+networks: {}
+    - sonarr-calendar
 ```
 Ensure the alias points to the correct host directory (the one mounted as `/output` in the tracker container).
 
 ## `custom.conf`
+If you serve the calendar via nginx, add a location block to serve images. This was done using a `custom.conf`.
 This file was placed inside the nginx container at `/etc/nginx/conf.d/default.conf` (or mounted as a volume). It serves the static HTML from the root directory and handles image requests under `/images/`.
 
-The `custom.conf` file is a minimal nginx configuration that serves both your public calendar (root) and a local version under `/local`, as well as the image cache. Here's the file with explanations:
+The `custom.conf` file is a minimal nginx configuration that serves both your public calendar (root) and a local version under `/local`, as well as the image cache. 
+
+Example below:
 
 ```conf
 server {
@@ -44,7 +61,7 @@ server {
 }
 
 ```
-## Explanation of each section
+### Explanation of each section
 - `listen 80`; server_name localhost;
 The server listens on port 80 for requests with `Host: localhost`. In your setup, this configuration is used by the nginx container to serve static files.
 
