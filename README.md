@@ -161,7 +161,12 @@ Below is a complete list of supported variables, their requirements, description
 >- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
 >- **Logo size** The logo is automatically constrained to a maximum height of 60px (adjustable in CSS if needed). It will not stretch the header.
 >- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
->- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file:
+>- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file.
+
+>If you wish to add/use your own logo the:
+- Public URL (SONARR_PUBLIC_URL) is used for links in the HTML (e.g., clicking a show title). If omitted, it defaults to SONARR_URL.
+- Image caching is enabled by default. The cache directory is inside the output volume (/output/sonarr_images). This directory must be served by your web server (see nginx configuration).
+- Custom logo – place a logo file in the web root and set CUSTOM_LOGO_URL=/logo.png. The logo appears inline with the page title.
 
 ---
 
@@ -194,17 +199,30 @@ that the relative path `sonarr_images/...` resolves correctly. The easiest way i
 
 To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
 
-\*\*NOTE: I haven't actually tested this method.
+>[!NOTE]
+>As stated I am running my version behind a proxy to serve the images.
+>Example below:
 
 ```
-nginx:
-  image: nginx:alpine
-  ports:
-    - "8080:80"
-  volumes:
-    - ./output:/usr/share/nginx/html:ro
-  depends_on:
+services:
+  web:
+    image: nginx:alpine
+    container_name: truenas-web
+    restart: unless-stopped
+    ports:
+      - <TrueNAS IP>:8081:80
+    volumes:
+      # public HTML (root)
+      - /mnt/truenas/media/sonarr730:/usr/share/nginx/html:ro
+      # local HTML (subfolder)  
+      - /mnt/truenas/media/sonarr730/sonarr_images:/usr/share/nginx/images_cache:ro
+      # Sonarr's own media cover (optional, not used by calendar)
+      - /mnt/truenas/app_configs/sonarr/MediaCover:/usr/share/nginx/html/MediaCover:ro
+      # nginx conf  
+      - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
+networks: {}
     - sonarr-calendar
 ```
+Ensure the alias points to the correct host directory (the one mounted as /output in the tracker container).
 
-Then access `http://your-host-ip:8080/UpcomingTV.html`.
+Then access `http://your-host-ip:8081/UpcomingTV.html`.
