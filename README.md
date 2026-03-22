@@ -153,15 +153,15 @@ Below is a complete list of supported variables, their requirements, description
 | `CUSTOM_LOGO_URL`        | No       | your logo file location                                                                                                                                                                    | relative path from web root        | `/output/logo.png`           |
 | `SONARR_PUBLIC_URL`      | No       | Make sure the URL is publicly accessible (or accessible to your users). The browser will fetch the image from that location.                                                               | public domain for links            | `https://sonarr.example.com` |
 
-### ⚠️ Important Notes
-
-- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
-- **Path variables** (`OUTPUT_HTML_FILE`, `OUTPUT_JSON_FILE`, `IMAGE_CACHE_DIR`) should point to locations inside **mounted volumes** to ensure data persists across container restarts.
-- The container runs as a non‑root user with a fixed UID (usually `100`). When using host‑mounted directories, ensure they are owned by that UID (or set permissions accordingly).
-- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
-- **Logo size** The logo is automatically constrained to a maximum height of 60px (adjustable in CSS if needed). It will not stretch the header.
-- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
-- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file:
+>[!IMPORTANT]
+>Important Notes
+>- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
+>- **Path variables** (`OUTPUT_HTML_FILE`, `OUTPUT_JSON_FILE`, `IMAGE_CACHE_DIR`) should point to locations inside **mounted volumes** to ensure data persists across container restarts.
+>- The container runs as a non‑root user with a fixed UID (usually `100`). When using host‑mounted directories, ensure they are owned by that UID (or set permissions accordingly).
+>- Setting `TZ` to your local timezone ensures that logs and date calculations reflect your local time.
+>- **Logo size** The logo is automatically constrained to a maximum height of 60px (adjustable in CSS if needed). It will not stretch the header.
+>- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
+>- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file:
 
 ---
 
