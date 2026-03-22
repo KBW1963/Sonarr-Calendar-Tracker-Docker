@@ -1,6 +1,6 @@
 # Sonarr Calendar Tracker – Troubleshooting Guide
 
-This guide helps you diagnose and fix common issues when deploying the Sonarr Calendar Tracker. Follow the steps in order, or jump to the section that matches your problem.
+This guide provides help if you need to diagnose and fix common issues when deploying the Sonarr Calendar Tracker. Follow the steps in order, or jump to the section that matches your problem.
 
 ---
 
@@ -370,6 +370,7 @@ This prints all API requests and image download attempts.
 If you’ve made modifications to the source and want to avoid mounting the code every time, build your own image:
 
 1.Copy your modified source into a directory.
+
 2.Create a Dockerfile:
 
 ```dockerfile
