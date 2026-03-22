@@ -2,29 +2,27 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue?style=flat-square)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![AI Assisted Yes](https://img.shields.io/badge/AI%20Assisted-Yes-red)
 ![Last Commit](https://img.shields.io/github/last-commit/KBW1963/sonarr-calendar-tracker?style=flat-square)
 
 ---
 
 # Sonarr Calendar Tracker - Docker version
 
-A beautiful, feature‑rich HTML dashboard for your [Sonarr](http://sonarr.tv) shows.  
-Monitor upcoming episodes over a specified date range, track overall progress, and see which seasons have been completed – all in a sleek, customisable interface.
+The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, interactive HTML dashboard from your Sonarr library. It fetches episode and series data, caches images, and displays upcoming episodes in a card‑based layout with progress bars, filters, and sorting. It is designed to be run in Docker, producing a static HTML file that can be served by any web server (e.g., nginx). The project has evolved significantly through user feedback, adding features like dual‑image caching, custom logos, season‑based progress filters, and a responsive design.
 
 ### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
 
 ---
 
-\*\*NOTE: I am not a SW developer or a coder by trade. I have a little knowledge to be dangerous and have used some skills from my past working life and my hobbyist approach to build this project.
-And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
+>[!NOTE]
+>I am not a SW developer or a coder by trade. I have a little knowledge to be dangerous and have used some skills from my past working life and my hobbyist approach to build this project.
+>And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
 
-To hopefully assit those that may find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
-
-The tracker has been designed to run locally on your own hardware and network. It hasn't been designed to be exposed to the outside world.
-
-I am releasing it to the community AS IS and provide no support or warranty. Use at your own risk. ALWAYS backup before installing.
-
-I am happy with it for my needs and will NOT be constantly developing it, sorry 😞.
+>To hopefully assit those that may find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
+>The tracker has been designed to run locally on your own hardware and network. It hasn't been designed to be exposed to the outside world.
+>I am releasing it to the community AS IS and provide no support or warranty. Use at your own risk. ALWAYS backup before installing.
+>I am happy with it for my needs and will NOT be constantly developing it, sorry 😞.
 
 ## So, please be understanding! ☺️.
 
