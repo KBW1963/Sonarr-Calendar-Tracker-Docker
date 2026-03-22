@@ -93,5 +93,5 @@ This makes the generated HTML and image cache available to nginx.
 If you need to serve the calendar on a different port (e.g., `8088`), the listen line would be `listen 8088;` and the port mapping in Docker would reflect that.
 
 >[!NOTE]
->This is the configuration I used to successfully with my external reverse proxy (Pangolin) running on a VPS to make the calendar publicly accessible.
+>This is the configuration I used successfully with my external reverse proxy (Pangolin) running on a VPS to make the calendar publicly accessible with nginx and the calendar deployed via dockge on TrueNAS Scale.
 
