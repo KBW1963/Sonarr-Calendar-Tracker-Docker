@@ -1,3 +1,20 @@
+# Nginx Configuration (External Web Server)
+If you serve the calendar via nginx, add a location block to serve images:
+
+```conf
+location /images/ {
+    alias /usr/share/nginx/html/sonarr_images/;
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+    try_files $uri =404;
+}
+
+```
+Ensure the alias points to the correct host directory (the one mounted as `/output` in the tracker container).
+
+## `custom.conf`
+
+The custom.conf file is a minimal nginx configuration that serves both your public calendar (root) and a local version under `/local`, as well as the image cache. Here's the file with explanations:
 
 ```conf
 server {
@@ -10,7 +27,7 @@ server {
         index index.html index.htm;
     }
 
-    # New location for the local calendar (optional, if you have a subfolder)
+    # New location for the local calendar
     location /local {
         alias /usr/share/nginx/local_html;
         autoindex on;
@@ -26,3 +43,38 @@ server {
 }
 
 ```
+## Explanation of each section
+- `listen 80`; server_name localhost;
+The server listens on port 80 for requests with `Host: localhost`. In your setup, this configuration is used by the nginx container to serve static files.
+
+- `location /`
+Serves the public calendar HTML from `/usr/share/nginx/html`. This is where your generated `index.html` (or `upcomingTV.html`) and any other static assets (like a logo) live.
+
+- `location /local`
+An optional location to serve a different version of the calendar (if you have one) from `/usr/share/nginx/local_html`. This is not used by the main calendar.
+
+
+### This is the critical addition for serving cached images.
+`location /images/`
+
+- `alias /usr/share/nginx/html/sonarr_images/` maps requests for `/images/...` to the subdirectory sonarr_images inside the web root.
+
+- `expires 30d` sets a long cache lifetime.
+
+- `add_header Cache-Control "public, immutable"` allows browsers to cache the images aggressively.
+
+- `try_files $uri =404`; returns a 404 if the image file does not exist.
+
+## 🧩 How it fits the  deployment
+- The tracker writes images to `/output/sonarr_images` inside its container, which is mapped to the host directory `/mnt/truenas/media/sonarr730/sonarr_images` (your output volume).
+
+- Your nginx container mounts the same host directory to `/usr/share/nginx/html/sonarr_images` (via the volumes section in your `nginx.yml`).
+
+- The `location /images/` block uses that mount to serve the images under the `/images/` URL path.
+
+Thus, when the HTML contains `<img src="/images/109_fanart.jpg">`, the browser requests `https://<domain URL>.co.uk/images/109_fanart.jpg`, and nginx serves the file from `/usr/share/nginx/html/sonarr_images/109_fanart.jpg`.
+
+>[!IMPORTANT]
+>The server_name localhost means this configuration only responds to requests for `localhost`. For your public domain (calendar.ksbflix.co.uk), you need another server block (likely managed by Pangolin or a separate nginx >config). In your setup, Pangolin handles the public domain and forwards traffic to this nginx container on port 8081.
+>
+>If you want the images to work both internally and externally, ensure that the public-facing server (Pangolin) also passes `/images/` requests to this same nginx container. Since the image URLs are relative, they will be >requested from the same domain, so as long as the domain points to a server that serves them, they will work.
