@@ -163,7 +163,7 @@ Below is a complete list of supported variables, their requirements, description
 >- **File format** Any common image format (PNG, JPG, SVG) works. Use a transparent background for best results.
 >- **No additional volume mount required** if you place the logo in the existing output directory. If you need a separate mount, you can mount a file.
 
->If you wish to add/use your own logo the:
+>If you wish to add/use your own logo then:
 - Public URL (SONARR_PUBLIC_URL) is used for links in the HTML (e.g., clicking a show title). If omitted, it defaults to SONARR_URL.
 - Image caching is enabled by default. The cache directory is inside the output volume (/output/sonarr_images). This directory must be served by your web server (see nginx configuration).
 - Custom logo – place a logo file in the web root and set CUSTOM_LOGO_URL=/logo.png. The logo appears inline with the page title.
