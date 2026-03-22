@@ -78,3 +78,20 @@ Thus, when the HTML contains `<img src="/images/109_fanart.jpg">`, the browser r
 >The server_name localhost means this configuration only responds to requests for `localhost`. For your public domain (calendar.ksbflix.co.uk), you need another server block (likely managed by Pangolin or a separate nginx >config). In your setup, Pangolin handles the public domain and forwards traffic to this nginx container on port 8081.
 >
 >If you want the images to work both internally and externally, ensure that the public-facing server (Pangolin) also passes `/images/` requests to this same nginx container. Since the image URLs are relative, they will be >requested from the same domain, so as long as the domain points to a server that serves them, they will work.
+
+## Mounting in Docker (nginx container)
+In your `nginx.yml` (or compose file), the volume mapping would be something like:
+
+```yaml
+volumes:
+  - /mnt/truenas/media/sonarr730:/usr/share/nginx/html:ro
+  - /mnt/truenas/app_configs/nginx/custom.conf:/etc/nginx/conf.d/default.conf:ro
+```
+
+This makes the generated HTML and image cache available to nginx.
+
+If you need to serve the calendar on a different port (e.g., `8088`), the listen line would be `listen 8088;` and the port mapping in Docker would reflect that.
+
+>[!NOTE]
+>This is the configuration I used to successfully with my external reverse proxy (Pangolin) running on a VPS to make the calendar publicly accessible.
+
