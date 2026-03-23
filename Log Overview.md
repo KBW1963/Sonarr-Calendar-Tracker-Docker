@@ -187,8 +187,105 @@ Filter by module: `docker logs sonarr-monitor 2>&1 | grep image_cache`
 | Container crashes on start          | Look for Python errors like `No module named sonarr_calendar`.                      |
 | Logo not appearing                  | Look for `✅ Custom logo configured` or warning; verify file location.              |
 
-### Log Rotation
+## Log Rotation Configuration
+Docker containers generate logs that are written to the host’s disk. By default, these logs can grow indefinitely. To prevent excessive disk usage, you should configure log rotation for your container.
 
-The container logs are handled by Docker’s logging driver. If logs grow too large, you can configure log rotation in Docker (e.g., `--log-opt max-size=10m --log-opt max-file=3`) in your `docker-compose.yml` under the service.
+## How Docker Logs Work
+Docker captures stdout and stderr from the container and stores them in a JSON file on the host (usually `/var/lib/docker/containers/<container-id>/<container-id>-json.log`). 
+
+The default logging driver is json-file, which supports rotation options.
+
+Without rotation, the log file can grow very large, potentially filling the disk.
+
+### Finding the Log File Path on TrueNAS
+#### 1. Get the container ID
+```bash
+docker ps -a | grep sonarr-monitor
+```
+The first column is the container ID (e.g., a1b2c3d4e5f6).
+
+#### 2. Find the log file location
+```bash
+docker inspect --format='{{.LogPath}}' <container-id>
+```
+This will print the full path to the JSON log file on the host (e.g., `/mnt/.../docker/containers/a1b2c3d4e5f6/a1b2c3d4e5f6-json.log`).
+
+#### 3. Check its size
+```bash
+du -sh $(docker inspect --format='{{.LogPath}}' <container-id>)
+```
+#### Example Output:
+```bash
+$ docker inspect --format='{{.LogPath}}' a1b2c3d4e5f6
+12K     /mnt/.ix-apps/docker/containers/a1b2c3d4e5f6-json.log
+```
+### Alternative: Use TrueNAS GUI (if available)
+TrueNAS Scale does not expose Docker log rotation in its UI. The recommended approach is to use the Docker Compose logging options as described.
+
+If you prefer to manage logs via the TrueNAS command line, you can also set up a periodic task to truncate logs, but the built‑in Docker rotation is simpler and safer.
+
+
+```bash
+docker inspect --format='{{.LogPath}}' <container-id>
+```
+This will print the full path to the JSON log file on the host (e.g., `/mnt/.../docker/containers/a1b2c3d4e5f6/a1b2c3d4e5f6-json.log`).
+
+
+
+
+## Configuring Log Rotation
+You can set log rotation parameters in your docker-compose.yml under the logging key for the service.
+
+#### Example: Basic Rotation
+
+```yaml
+services:
+  sonarr-monitor:
+    image: tomita2022/sonarr-calendar:latest
+    # ... other configuration ...
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"       # maximum size of each log file
+        max-file: "3"         # number of log files to keep
+```
+
+- `max-size` – When the log file reaches this size, it is rotated. Common units: k, m, g.
+- `max-file` – Number of rotated log files to retain. The oldest file is deleted when the limit is exceeded.
+
+With these settings, Docker will keep up to three log files, each up to 10 MB, for a maximum of 30 MB of logs.
+
+#### Example with Compression (optional)
+The `json-file` driver also supports compression. To enable compression (saves space), add:
+```yaml
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+```
+
+## Applying Rotation to an Existing Container
+If you add logging options to an existing service in `docker-compose.yml`, you must recreate the container for the changes to take effect:
+```bash
+docker compose down
+docker compose up -d
+```
+
+## Alternative: Use a Dedicated Logging Driver
+Docker supports several logging drivers (e.g., `syslog`, `journald`, `fluentd`). For example, to send logs to the systemd journal:
+```yaml
+    logging:
+      driver: "journald"
+      options:
+        tag: "sonarr-monitor"
+```
+This sends logs to the host’s journal, which can be configured with its own rotation policies. However, for most users, the `json-file` driver with rotation is sufficient.
+
+>[!Important]
+>- Log rotation settings apply only to new containers (they are not retroactive).
+>- If you use a different logging driver (e.g., none), logs are discarded. Use this only if you don't need logs.
+>- For production environments, consider using a centralized logging solution (e.g., ELK stack, Loki) to manage logs across containers.
 
 For further details, refer to the [Troubleshooting Guide](https://github.com/KBW1963/Sonarr-Calendar-Tracker-Docker/blob/main/troubleshooting.md).
