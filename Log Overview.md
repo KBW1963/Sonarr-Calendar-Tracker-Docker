@@ -191,4 +191,4 @@ Filter by module: `docker logs sonarr-monitor 2>&1 | grep image_cache`
 
 The container logs are handled by Docker’s logging driver. If logs grow too large, you can configure log rotation in Docker (e.g., `--log-opt max-size=10m --log-opt max-file=3`) in your `docker-compose.yml` under the service.
 
-For further details, refer to the [Troubleshooting Guide].
+For further details, refer to the [Troubleshooting Guide](https://github.com/KBW1963/Sonarr-Calendar-Tracker-Docker/blob/main/troubleshooting.md).
