@@ -197,7 +197,9 @@ The default logging driver is json-file, which supports rotation options.
 
 Without rotation, the log file can grow very large, potentially filling the disk.
 
-### Finding the Log File Path on TrueNAS
+<details>
+  <summary>Finding the Log File Path on TrueNAS</summary>
+  
 #### 1. Get the container ID
 ```bash
 docker ps -a | grep sonarr-monitor
@@ -219,6 +221,7 @@ du -sh $(docker inspect --format='{{.LogPath}}' <container-id>)
 $ docker inspect --format='{{.LogPath}}' a1b2c3d4e5f6
 12K     /mnt/.ix-apps/docker/containers/a1b2c3d4e5f6-json.log
 ```
+</details>
 ### Alternative: Use TrueNAS GUI (if available)
 TrueNAS Scale does not expose Docker log rotation in its UI. The recommended approach is to use the Docker Compose logging options as described.
 
