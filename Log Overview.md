@@ -141,7 +141,7 @@ or
 ⚠️ Custom logo path configured but file does not exist: /output/logo.png
 
 - **Source:** `html_generator.py`
-- **Meaning:** The tracker detected a custom logo configuration and logged the result. The warning indicates the file is missing – check the path.
+- **Meaning:** The tracker found a custom logo URL in the environment (`CUSTOM_LOGO_URL` or `CUSTOM_LOGO_PATH`) and will include it in the HTML. The log shows the resolved source (relative path or URL). If a local file path was used and the file does not exist, a warning would appear instead.
 
 ### 14. Overall completion
 
