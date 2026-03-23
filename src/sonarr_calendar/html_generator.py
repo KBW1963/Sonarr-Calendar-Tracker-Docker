@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, timedelta, timezone
 import base64
 import logging
+import os   # <-- added for file existence check
 
 from sonarr_calendar import __display_version__ as version
 from sonarr_calendar.models import ProcessedShow
@@ -89,9 +90,13 @@ class HTMLGenerator:
         logo_src = None
         if self.config.custom_logo_url:
             logo_src = self.config.custom_logo_url
+            logger.info(f"✅ Custom logo configured: {logo_src}")
         elif self.config.custom_logo_path:
-            # Path is inside the container; the file should be mounted
             logo_src = self.config.custom_logo_path
+            if os.path.exists(logo_src):
+                logger.info(f"✅ Custom logo found at local path: {logo_src}")
+            else:
+                logger.warning(f"⚠️ Custom logo path configured but file does not exist: {logo_src}")
 
         template = self.env.get_template('calendar.html.j2')
         return template.render(
@@ -107,7 +112,7 @@ class HTMLGenerator:
             cached_fanart_urls=cached_fanart_urls,
             cached_poster_urls=cached_poster_urls,
             error_message=error_message,
-            logo_src=logo_src,           # NEW
+            logo_src=logo_src,
             DISPLAY_EPISODES_LIMIT=2,
             EPISODE_ITEM_HEIGHT=80,
             EXPAND_BUTTON_HEIGHT=42
