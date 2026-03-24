@@ -12,7 +12,8 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 ### Added
 - **Custom Logo Support** – Users can now add a personal logo by setting `CUSTOM_LOGO_URL` (remote URL) or `CUSTOM_LOGO_PATH` (local file path). The logo appears inline with the page title, left‑aligned, and is constrained to a reasonable size.
 - **Logo Logging** – During generation, the tracker logs whether a logo was configured and, for local files, whether the file exists. This helps users verify that the logo path is correct.
-
+- **Logo Logging** - Modified the logger to `Debug`, this stops image URL's being displayed when new images are downloaded.
+  
 ### Changed
 - **HTML Template** – The header now uses a flexbox layout to place the logo alongside the title. The CSS ensures the logo scales on small screens.
 
