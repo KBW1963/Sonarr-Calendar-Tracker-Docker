@@ -411,4 +411,6 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - Indentation error in `cli.py`.
 - NameError in connection test (moved requests import inside class).
 
-_Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
+>[!NOTE]
+>Change details can be found here [changelog.md](https://github.com/KBW1963/Sonarr-Calendar-Tracker/blob/main/CHANGELOG.md). This was the pre-docker development.
+>This version is the last pre‑Docker release. Docker versions start at 3.0.0.
