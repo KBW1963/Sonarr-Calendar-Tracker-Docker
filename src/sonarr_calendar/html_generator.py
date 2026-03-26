@@ -113,6 +113,7 @@ class HTMLGenerator:
             cached_poster_urls=cached_poster_urls,
             error_message=error_message,
             logo_src=logo_src,
+            instance_name=self.config.instance_name,
             DISPLAY_EPISODES_LIMIT=2,
             EPISODE_ITEM_HEIGHT=80,
             EXPAND_BUTTON_HEIGHT=42
