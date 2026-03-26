@@ -7,15 +7,18 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
-## [3.8.0] - 2026-03-20
+## [3.8.0] - 2026-03-26
 
 ### Added
+- **Instance identifier** – New environment variable `INSTANCE_NAME`. If set, the value appears in the footer of the generated HTML, helping users distinguish between multiple calendar instances (e.g., “Main Server”, “Test”).  
+- **Configurable footer text** – The identifier is passed from the config to the template and displayed above the version info.
 - **Custom Logo Support** – Users can now add a personal logo by setting `CUSTOM_LOGO_URL` (remote URL) or `CUSTOM_LOGO_PATH` (local file path). The logo appears inline with the page title, left‑aligned, and is constrained to a reasonable size.
 - **Logo Logging** – During generation, the tracker logs whether a logo was configured and, for local files, whether the file exists. This helps users verify that the logo path is correct.
 - **Logo Logging** - Modified the logger to `Debug`, this stops image URL's being displayed when new images are downloaded.
   
 ### Changed
 - **HTML Template** – The header now uses a flexbox layout to place the logo alongside the title. The CSS ensures the logo scales on small screens.
+- **Image download logging** – The INFO logs for individual image downloads (e.g., “Downloading fanart for series X from …”) are now downgraded to DEBUG. Normal INFO logs now only show summary counts, reducing log noise and avoiding exposure of internal URLs. To see detailed download logs, run with `--once --verbose`.
 
 ## [3.7.1] - 2026-03-20
 
