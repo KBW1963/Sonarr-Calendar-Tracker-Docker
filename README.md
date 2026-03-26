@@ -155,6 +155,7 @@ All configuration is done via environment variables. Required variables must be 
 | `TZ`                      | No       | Container timezone (used for log timestamps and date calculations).                                                                                                              | `UTC`                | `Europe/London`                           |
 | `CUSTOM_LOGO_URL`         | No       | Public URL of a logo image (e.g., `/logo.png` if the file is in the web root). Overrides `CUSTOM_LOGO_PATH`.                                                                    | –                    | `/logo.png` or `https://example.com/logo.png` |
 | `CUSTOM_LOGO_PATH`        | No       | Path inside the container to a logo file (e.g., a mounted volume). Use if the logo is not served by the web server.                                                              | –                    | `/output/logo.png`                        |
+| `INSTANCE_NAME` | No | Use if you have multi-installs and the calendar on different machines| - | `Test`, `Main` |
 
 >[!IMPORTANT]
 >- **Required variables** must be provided; if any are missing, the application will exit with an error listing the missing ones.
