@@ -1702,6 +1702,9 @@
 
         <footer>
             <div>Powered by <a href="https://sonarr.tv/" target="_blank" rel="noopener noreferrer">Sonarr</a></div>
+            {% if instance_name %}
+            <div class="instance-info">Instance: {{ instance_name }}</div>
+            {% endif %}
             <div class="last-updated" id="lastUpdated">
                 Last updated: {{ now()|format_date }} {{ now().strftime('%H:%M:%S UTC') }}
             </div>

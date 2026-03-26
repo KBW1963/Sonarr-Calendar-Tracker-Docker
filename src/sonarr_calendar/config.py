@@ -26,6 +26,7 @@ class Config:
     sonarr_public_url: Optional[str] = None
     custom_logo_path: Optional[str] = None   # local file path inside container
     custom_logo_url: Optional[str] = None    # remote URL
+    instance_name: Optional[str] = None   # custom identifier for the footer
 
     def __post_init__(self):
         if not self.sonarr_url.startswith(('http://', 'https://')):
@@ -87,5 +88,6 @@ def load_config(config_path: Optional[Path] = None) -> Config:
         sonarr_public_url=os.getenv('SONARR_PUBLIC_URL'),
         custom_logo_path=os.getenv('CUSTOM_LOGO_PATH'),
         custom_logo_url=os.getenv('CUSTOM_LOGO_URL'),
+        instance_name=os.getenv('INSTANCE_NAME'),
     )
     return config

@@ -7,11 +7,18 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 
 ---
 
-## [3.8.0] - 2026-03-20
+## [3.8.0] - 2026-03-26
 
 ### Added
-
-- **Custom Logo** – Users can now add a personal logo to the calendar by setting `CUSTOM_LOGO_URL` (a public URL) or `CUSTOM_LOGO_PATH` (a path inside the container). The logo appears inline with the page title, left‑aligned and scaled to a maximum height of 60px (responsive). See the documentation for instructions.
+- **Instance identifier** – New environment variable `INSTANCE_NAME`. If set, the value appears in the footer of the generated HTML, helping users distinguish between multiple calendar instances (e.g., “Main Server”, “Test”).  
+- **Configurable footer text** – The identifier is passed from the config to the template and displayed above the version info.
+- **Custom Logo Support** – Users can now add a personal logo by setting `CUSTOM_LOGO_URL` (remote URL) or `CUSTOM_LOGO_PATH` (local file path). The logo appears inline with the page title, left‑aligned, and is constrained to a reasonable size.
+- **Logo Logging** – During generation, the tracker logs whether a logo was configured and, for local files, whether the file exists. This helps users verify that the logo path is correct.
+- **Logo Logging** - Modified the logger to `Debug`, this stops image URL's being displayed when new images are downloaded.
+  
+### Changed
+- **HTML Template** – The header now uses a flexbox layout to place the logo alongside the title. The CSS ensures the logo scales on small screens.
+- **Image download logging** – The INFO logs for individual image downloads (e.g., “Downloading fanart for series X from …”) are now downgraded to DEBUG. Normal INFO logs now only show summary counts, reducing log noise and avoiding exposure of internal URLs. To see detailed download logs, run with `--once --verbose`.
 
 ## [3.7.1] - 2026-03-20
 
@@ -407,4 +414,6 @@ Version numbers starting from 3.0.0 correspond to the Docker‑ready release.
 - Indentation error in `cli.py`.
 - NameError in connection test (moved requests import inside class).
 
-_Note: This version is the last pre‑Docker release. Docker versions start at 3.0.0._
+>[!NOTE]
+>Change details can be found here [changelog.md](https://github.com/KBW1963/Sonarr-Calendar-Tracker/blob/main/CHANGELOG.md). This was the pre-docker development.
+>This version is the last pre‑Docker release. Docker versions start at 3.0.0.

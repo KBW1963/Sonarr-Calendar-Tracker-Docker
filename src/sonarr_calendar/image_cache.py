@@ -90,14 +90,14 @@ class ImageCache:
             logger.debug("Cached %s for series %d already exists", image_type, series_id)
             return True
         try:
-            logger.info("Downloading %s for series %d from %s", image_type, series_id, url)
+            logger.debug("Downloading %s for series %d from %s", image_type, series_id, url)
             if session:
                 resp = session.get(url, timeout=15)
             else:
                 resp = requests.get(url, timeout=15)
             resp.raise_for_status()
             dest.write_bytes(resp.content)
-            logger.info("Successfully downloaded %s for series %d", image_type, series_id)
+            logger.debug("Successfully downloaded %s for series %d", image_type, series_id)
             return True
         except Exception as e:
             logger.warning("Failed to download %s for series %d: %s", image_type, series_id, e)
