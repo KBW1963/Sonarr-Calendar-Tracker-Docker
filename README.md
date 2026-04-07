@@ -20,7 +20,8 @@ The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, 
 >And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
 >
 >To hopefully assit those that find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
->The tracker has been designed to run locally on your own hardware and network. However, I am currently reunning behind a proxy utilising [Pangolin](https://pangolin.net) on a VPS and [Nginx](https://nginx.org/) running on TrueNAS.
+>The tracker has been designed to run locally on your own hardware and network. However, I am currently running behind a proxy utilising [Pangolin](https://pangolin.net) on a VPS and [Nginx](https://nginx.org/) running on TrueNAS as a test (it works!). But as stated the intention is not to expose it to the outside world. DO SO AT YOUR OWN RISK.
+>
 >I am releasing it to the community AS IS and provide no support or warranty.
 
 
