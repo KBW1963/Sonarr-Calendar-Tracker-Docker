@@ -200,7 +200,7 @@ docker run -e SONARR_URL="http://192.168.1.100:8989" \
 If your output directory is on a WebDAV share (e.g., `/mnt/truenas/media/sonarr730`), you can access the HTML file via your WebDAV client or by mounting the share in your OS. However, the images must be placed so
 that the relative path `sonarr_images/...` resolves correctly. The easiest way is to set `IMAGE_CACHE_DIR=/output/sonarr_images`. Then both HTML and images live under the same WebDAV root.
 
-### Of you could use nginx (Optional)
+### Or you could use nginx (Optional)
 
 To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
 
