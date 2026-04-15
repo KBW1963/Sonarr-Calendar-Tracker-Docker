@@ -9,7 +9,9 @@
 
 # Sonarr Calendar Tracker - Docker version
 
-The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, interactive HTML dashboard from your Sonarr library. It fetches episode and series data, caches images, and displays upcoming episodes in a card‑based layout with progress bars, filters, and sorting. It is designed to be run in Docker, producing a static HTML file that can be served by any web server (e.g., nginx). The project has evolved significantly through user feedback, adding features like dual‑image caching, custom logos, season‑based progress filters, and a responsive design.
+The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, interactive HTML dashboard from your Sonarr library. It fetches episode and series data, caches images, and displays upcoming episodes in a card‑based layout with progress bars, filters, and sorting. 
+
+It is designed to be run in Docker, producing a static HTML file that can be served by any web server (e.g., nginx). The project has evolved significantly, adding features like dual‑image caching, custom logos, season‑based progress filters, and a responsive design.
 
 ### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
 
@@ -20,7 +22,10 @@ The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, 
 >And YES! a lot of research was needed to help me understand and develop the code, along with some AI suggestions, which to be fair is hard to not do with search engines today.
 >
 >To hopefully assit those that find this useful and do not want to use the python version [sonarr calendar tracker](https://github.com/KBW1963/Sonarr-Calendar-Tracker). Here is a docker version.
->The tracker has been designed to run locally on your own hardware and network. However, I am currently reunning behind a proxy utilising [Pangolin](https://pangolin.net) on a VPS and [Nginx](https://nginx.org/) running on TrueNAS.
+>The tracker has been designed to run locally on your own hardware and network.
+>
+>I have tested publishing the calendar utilising [Pangolin](https://pangolin.net) on a VPS, [Nginx](https://nginx.org/) running on locally, in my case TrueNAS and a domain, it works!. But as stated the intention is not to expose it to the outside world. ⚠️ DO SO AT YOUR OWN RISK!! ⚠️.
+>
 >I am releasing it to the community AS IS and provide no support or warranty.
 
 
@@ -200,7 +205,7 @@ docker run -e SONARR_URL="http://192.168.1.100:8989" \
 If your output directory is on a WebDAV share (e.g., `/mnt/truenas/media/sonarr730`), you can access the HTML file via your WebDAV client or by mounting the share in your OS. However, the images must be placed so
 that the relative path `sonarr_images/...` resolves correctly. The easiest way is to set `IMAGE_CACHE_DIR=/output/sonarr_images`. Then both HTML and images live under the same WebDAV root.
 
-### Of you could use nginx (Optional)
+### Or you could use nginx (Optional)
 
 To view the dashboard in a browser, you can add an nginx container that serves the output directory. Example `docker-compose` addition:
 

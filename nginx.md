@@ -100,7 +100,7 @@ This maps the host file `/mnt/truenas/app_configs/nginx/custom.conf` to the cont
 Thus, when the HTML contains `<img src="/images/109_fanart.jpg">`, the browser requests `https://<domain URL>.co.uk/images/109_fanart.jpg`, and nginx serves the file from `/usr/share/nginx/html/sonarr_images/109_fanart.jpg`.
 
 >[!IMPORTANT]
->The server_name localhost means this configuration only responds to requests for `localhost`. For your public domain (calendar.ksbflix.co.uk), you need another server block (likely managed by Pangolin or a separate nginx >config). In your setup, Pangolin handles the public domain and forwards traffic to this nginx container on port 8081.
+>The server_name localhost means this configuration only responds to requests for `localhost`. For your public domain (<your_domain>.co.uk), you need another server block (likely managed by Pangolin or a separate nginx >config). In your setup, Pangolin handles the public domain and forwards traffic to this nginx container on port 8081.
 >
 >If you want the images to work both internally and externally, ensure that the public-facing server (Pangolin) also passes `/images/` requests to this same nginx container. Since the image URLs are relative, they will be >requested from the same domain, so as long as the domain points to a server that serves them, they will work.
 
