@@ -158,38 +158,6 @@ or
 - **Meaning:** The container is in daemon mode and will sleep before the next automatic generation.
 
 ---
-
-## Enabling Verbose Logging
-
-To see detailed DEBUG logs (including per‑series image checks and more), run the generator manually with the `--verbose` flag:
-
-```bash
-docker exec -it sonarr-monitor python -m sonarr_calendar --once --verbose
-```
-
-In Docker Compose, you can set the command to include `--verbose` for a single run, or modify the service to always run with verbose (not recommended for normal operation due to log volume).
-
-## Reading Logs in Docker
-
-View container logs: `docker logs sonarr-monitor`
-
-Follow logs in real time: `docker logs -f sonarr-monitor`
-
-Filter by module: `docker logs sonarr-monitor 2>&1 | grep image_cache`
-
-### Interpreting Logs for Troubleshooting
-
-| Problem                             | Look for...                                                                         |
-| ----------------------------------- | ----------------------------------------------------------------------------------- |
-| No data in calendar                 | `API request failed` for calendar or series; check `SONARR_URL`.                    |
-| Missing images (broken)             | `WARNING - Failed to download` with 401 or 404; check `SONARR_URL` internal access. |
-| Images not showing on external site | Check that nginx serves `/images/`; look for 404 in browser console.                |
-| Container crashes on start          | Look for Python errors like `No module named sonarr_calendar`.                      |
-| Logo not appearing                  | Look for `✅ Custom logo configured` or warning; verify file location.              |
-
-## Log Rotation Configuration
-Docker containers generate logs that are written to the host’s disk. By default, these logs can grow indefinitely. To prevent excessive disk usage, you should configure log rotation for your container.
-
 ## How Docker Logs Work
 Docker captures stdout and stderr from the container and stores them in a JSON file on the host (usually `/var/lib/docker/containers/<container-id>/<container-id>-json.log`). 
 
@@ -222,22 +190,39 @@ $ docker inspect --format='{{.LogPath}}' a1b2c3d4e5f6
 12K     /mnt/.ix-apps/docker/containers/a1b2c3d4e5f6-json.log
 ```
 </details>
-### Alternative: Use TrueNAS GUI (if available)
+
+#### Alternative: Use TrueNAS GUI (if available)
 TrueNAS Scale does not expose Docker log rotation in its UI. The recommended approach is to use the Docker Compose logging options as described.
 
 If you prefer to manage logs via the TrueNAS command line, you can also set up a periodic task to truncate logs, but the built‑in Docker rotation is simpler and safer.
-
 
 ```bash
 docker inspect --format='{{.LogPath}}' <container-id>
 ```
 This will print the full path to the JSON log file on the host (e.g., `/mnt/.../docker/containers/a1b2c3d4e5f6/a1b2c3d4e5f6-json.log`).
 
+## Reading Logs in Docker
+
+View container logs: `docker logs sonarr-monitor`
+
+Follow logs in real time: `docker logs -f sonarr-monitor`
+
+Filter by module: `docker logs sonarr-monitor 2>&1 | grep image_cache`
+
+### Interpreting Logs for Troubleshooting
+
+| Problem                             | Look for...                                                                         |
+| ----------------------------------- | ----------------------------------------------------------------------------------- |
+| No data in calendar                 | `API request failed` for calendar or series; check `SONARR_URL`.                    |
+| Missing images (broken)             | `WARNING - Failed to download` with 401 or 404; check `SONARR_URL` internal access. |
+| Images not showing on external site | Check that nginx serves `/images/`; look for 404 in browser console.                |
+| Container crashes on start          | Look for Python errors like `No module named sonarr_calendar`.                      |
+| Logo not appearing                  | Look for `✅ Custom logo configured` or warning; verify file location.              |
 
 
-
-## Configuring Log Rotation
-You can set log rotation parameters in your docker-compose.yml under the logging key for the service.
+## Log Rotation Configuration
+Docker containers generate logs that are written to the host’s disk. By default, these logs can grow indefinitely. To prevent excessive disk usage, you should configure log rotation for your container by adding 
+logging options to your docker-compose.yml.
 
 #### Example: Basic Rotation
 
@@ -269,14 +254,14 @@ The `json-file` driver also supports compression. To enable compression (saves s
         compress: "true"
 ```
 
-## Applying Rotation to an Existing Container
+### Applying Rotation to an Existing Container
 If you add logging options to an existing service in `docker-compose.yml`, you must recreate the container for the changes to take effect:
 ```bash
 docker compose down
 docker compose up -d
 ```
 
-## Alternative: Use a Dedicated Logging Driver
+### Alternative: Use a Dedicated Logging Driver
 Docker supports several logging drivers (e.g., `syslog`, `journald`, `fluentd`). For example, to send logs to the systemd journal:
 ```yaml
     logging:
@@ -292,3 +277,13 @@ This sends logs to the host’s journal, which can be configured with its own ro
 >- For production environments, consider using a centralized logging solution (e.g., ELK stack, Loki) to manage logs across containers.
 
 For further details, refer to the [Troubleshooting Guide](https://github.com/KBW1963/Sonarr-Calendar-Tracker-Docker/blob/main/troubleshooting.md).
+
+## Enabling Verbose Logging
+
+To see detailed DEBUG logs (including per‑series image checks and more), run the generator manually with the `--verbose` flag:
+
+```bash
+docker exec -it sonarr-monitor python -m sonarr_calendar --once --verbose
+```
+
+In Docker Compose, you can set the command to include `--verbose` for a single run, or modify the service to always run with verbose (not recommended for normal operation due to log volume).
