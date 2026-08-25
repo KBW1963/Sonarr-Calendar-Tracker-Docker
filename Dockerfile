@@ -33,4 +33,5 @@ USER app
 ENTRYPOINT ["python", "-m", "sonarr_calendar"]
 
 # Default command (auto-refresh mode)
-CMD []
+# CMD []
+CMD ["python", "server.py"]
