@@ -13,7 +13,7 @@ The Sonarr Calendar Tracker is a self‑hosted tool that generates a beautiful, 
 
 It is designed to be run in Docker, producing a static HTML file that can be served by any web server (e.g., nginx). The project has evolved significantly, adding features like dual‑image caching, custom logos, season‑based progress filters, and a responsive design.
 
-### [Screenshot](https://github.com/KBW1963/sonarr_calendar/blob/main/sonarr_calendar_screenshot.png)
+### [Screenshot](https://github.com/KBW1963/Sonarr-Calendar-Tracker-Docker/blob/main/sonarr_calendar_screenshot.png)
 
 ---
 
